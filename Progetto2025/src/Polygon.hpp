@@ -17,6 +17,7 @@ namespace PolygonalLibrary{
         unsigned int Dim2D;// lunghezza della matrice 2D (numero di righe, dunque numero di poligoni)
         
         unsigned int classe;
+		unsigned int d;
         
         string nomefile0;
         string nomefile1;
@@ -30,6 +31,8 @@ namespace PolygonalLibrary{
         Eigen::MatrixXi M1D; 
         vector<vector< int>> M2D_vertici;
         vector<vector< int>> M2D_spigoli;
+		
+		
     };
 
 };

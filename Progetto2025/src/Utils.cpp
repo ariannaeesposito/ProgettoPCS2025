@@ -10,6 +10,8 @@
 #include <algorithm>
 #include <string>
 
+using namespace std;
+using namespace Eigen;
 
 namespace PolygonalLibrary
 
@@ -88,11 +90,17 @@ if (flag == 0){
 }
 int classe;
 flag = 0;
-if ((b==0 && c >= 1)||(c==0 && b >= 1)){
+if (b==0 && c >= 1){
     mesh.classe = 1;
+	mesh.d=c;
     flag = 1;
-
 }
+if (c==0 && b >= 1){
+	mesh.classe=1;
+	mesh.d=b;
+	flag=1;
+}
+
 if ((b==c && b >= 1)){
     mesh.classe = 2;
     flag = 1;
@@ -280,8 +288,38 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
     return true;
     }
 
-void triangolazione(PolygonalMesh& mesh, ){
+void triangolazione(PolygonalMesh& mesh){
+	if (mesh.classe ==1){
+		triangolazione1(mesh);
+	}
+	else{
+		triangolazione2(mesh);
+	}
+}
+
+void triangolazione1(PolygonalMesh& mesh){
 	
+}
+
+void triangolazione2(PolygonalMesh& mesh){
+	
+}
+
+unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord){
+	double tol = pow(10,-15); \\definiamo tolleranza
+;	for (const auto& coppia : mesh.coordinate_punti){ \\iteriamo sulla mappa
+		diff = coppia.first-coord; \\calcoliamo la differnaza tra i due set di coordinate
+		if (diff.norm() < tol){ \\se sono vicine allora le consideriamo le stesse
+			return coppia.second \\restituiamo l'id associato a quelle coordinate
+		}
+	}
+	\\ se non c'è nella mappa lo creiamo nuovo
+	unsigned int dim = Pmesh.Dim0D; \\dim corrente
+	mesh.coordinate_punti[coord] = dim+1; \\cell0ds già piena stiamo, stiamo aggiungendo alla mappa una chiave e l'id relativo
+	Pmesh.dim0D += 1; \\aumentiamo il conteggio dei punti già creati
+	Pmesh.Cell0DsCoordinates(0, dim+1)=coord(0); \\mettiamo il nuovo punto dentro la polygonal mesh
+	Pmesh.Cell0DsCoordinates(1, dim+1)=coord(1);
+	Pmesh.Cell0DsCoordinates(2, dim+1)=coord(2);
 }
 
 }

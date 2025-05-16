@@ -298,7 +298,15 @@ void triangolazione(PolygonalMesh& mesh){
 }
 
 void triangolazione1(PolygonalMesh& mesh){
-	
+	unsigned int facce = mesh.Dim2D;
+	for (unsigned int i=0; i<facce; i++){ \\ i è la faccia
+		unsigned int Aid = mesh.M2D_vertici(i,0);
+		unsigned int Bid = mesh.M2D_vertici(i,1);
+		unsigned int Cid = mesh.M2D_vertici(i,2);
+		Vector3d Acoord = mesh.M0D.col(Aid);
+		Vector3d Bcoord = mesh.M0D.col(Bid);
+		Vector3d Ccoord = mesh.M0D.col(Cid);
+	}
 }
 
 void triangolazione2(PolygonalMesh& mesh){
@@ -317,9 +325,10 @@ unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<un
 	unsigned int dim = Pmesh.Dim0D; \\dim corrente
 	mesh.coordinate_punti[coord] = dim+1; \\cell0ds già piena stiamo, stiamo aggiungendo alla mappa una chiave e l'id relativo
 	Pmesh.dim0D += 1; \\aumentiamo il conteggio dei punti già creati
-	Pmesh.Cell0DsCoordinates(0, dim+1)=coord(0); \\mettiamo il nuovo punto dentro la polygonal mesh
-	Pmesh.Cell0DsCoordinates(1, dim+1)=coord(1);
-	Pmesh.Cell0DsCoordinates(2, dim+1)=coord(2);
+	Pmesh.M0D(0, dim+1)=coord(0); \\mettiamo il nuovo punto dentro la polygonal mesh
+	Pmesh.M0D(1, dim+1)=coord(1);
+	Pmesh.M0D(2, dim+1)=coord(2);
+	return dim+1;
 }
 
 }

@@ -279,4 +279,9 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
         
     return true;
     }
+
+void triangolazione(PolygonalMesh& mesh, ){
+	
+}
+
 }

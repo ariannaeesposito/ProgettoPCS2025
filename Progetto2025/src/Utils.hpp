@@ -11,7 +11,7 @@ using namespace Gedim;
 namespace PolygonalLibrary
 {
 
-bool ImportMesh(PolygonalMesh& mesh,const string& nomefile0,const string& nomefile1,const string& nomefile2);
+bool ImportMesh(PolygonalMesh& mesh);
 bool input_solido_platonico(PolygonalMesh& mesh, int dim ,char* argv[]);
  
 }

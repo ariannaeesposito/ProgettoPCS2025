@@ -102,7 +102,8 @@ if (flag == 0){
     cout << "errore flag bc" << endl;
     return false;
 }
-cout << "arrivarìti qui" << endl;
+cout << "arrivati qui" << endl;
+
 return true;
 }
 
@@ -123,7 +124,7 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
     ifstream file_Cell0Ds(mesh.nomefile0);
     if (!file_Cell0Ds.is_open())
     {
-        cerr << "Error opening file Cell0Ds.csv" << endl;
+        cerr << "Error opening file "<< mesh.nomefile0 << endl;
         return false;
     }
     string riga;
@@ -141,8 +142,10 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
         cerr << "There is no cell 0D" << endl;
         return false;
     }
+
     mesh.M0D = Eigen::MatrixXd::Zero(3, mesh.Dim0D); 
 // voglio stampare la lista
+
     for (string& li : lista_dim) // itero una lista
     {
         replace(li.begin(), li.end(), ';', ' ');
@@ -169,7 +172,7 @@ bool ImportCell1Ds(PolygonalMesh& mesh)
             ifstream file_Cell1Ds(mesh.nomefile1);
             if (!file_Cell1Ds.is_open())
             {
-                cerr << "Error opening file Cell0Ds.csv" << endl;
+                cerr << "Error opening file "<< mesh.nomefile1 << endl;
                 return false;
             }
             string riga;
@@ -178,14 +181,17 @@ bool ImportCell1Ds(PolygonalMesh& mesh)
             {
                 lista_dim.push_back(riga);
             }
+
             file_Cell1Ds.close();
-            lista_dim.pop_front();//tolgo l'intestazione
+            lista_dim.pop_front(); //tolgo l'intestazione
+
             mesh.Dim1D = lista_dim.size();
             if (mesh.Dim1D == 0)
             {
                 cerr << "There is no cell 1D" << endl;
                 return false;
             }
+
             mesh.M1D = MatrixXi::Zero(2, mesh.Dim1D); ; 
             for (string& li : lista_dim) // itero una lista
             {
@@ -211,9 +217,10 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
         ifstream file_Cell2Ds(mesh.nomefile2);
         if (!file_Cell2Ds.is_open())
         {
-            cerr << "Error opening file Cell2Ds.csv" << endl;
+            cerr << "Error opening file "<< mesh.nomefile2 << endl;
             return false;
         }
+        
         string riga;
         list<string> lista_dim;
         while (getline(file_Cell2Ds, riga))

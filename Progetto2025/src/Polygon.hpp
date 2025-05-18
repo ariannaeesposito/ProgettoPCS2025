@@ -1,4 +1,3 @@
-
 #pragma once
 
 #include <iostream>
@@ -21,8 +20,6 @@ namespace PolygonalLibrary{
         vector<unsigned int> Cell1DsId;
         vector<unsigned int> Cell2DsId;
 
-        MatrixXd Cell0DsCoordinates;
-
         unsigned int classe;
         unsigned int d , q , p ;
         
@@ -34,11 +31,13 @@ namespace PolygonalLibrary{
         map <unsigned int, list<unsigned int>> marker1D;
         map <unsigned int, list<unsigned int>> marker2D;
 
-        Eigen::MatrixXd M0D;
-        Eigen::MatrixXi M1D; 
-        vector<vector< int>> M2D_vertici;
+        MatrixXd M0D; //coordinate
+        MatrixXi M1D; //estremi
 
-        vector<vector< int>> M2D_spigoli; //facce
-    };
+        vector<vector<unsigned int>> M2D_vertici; // essendo un vector di vector oer accedere ai singoli elt devo utilizzare [][] e non ( , )
+        vector<vector<unsigned int>> M2D_spigoli; 
+       
 
-};
+} ;
+
+}

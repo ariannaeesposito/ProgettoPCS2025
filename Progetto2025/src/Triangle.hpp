@@ -9,6 +9,15 @@ using namespace Eigen;
 
 namespace PoligonalLibrary {
 
+struct Vector3dComparator {
+    bool operator()(const Vector3d& a, const Vector3d& b) const {
+        for (int i = 0; i < 3; ++i) {
+            if (a[i] < b[i]) return true;
+            if (a[i] > b[i]) return false;
+        }
+        return false;
+    }
+}
 //DA CAMBIARE TUTTOOOOO
 //CI SONO SOLO POCHE COSE FATTE BENE
 
@@ -35,4 +44,5 @@ struct TriangularMesh
     map<unsigned int,list <unsigned int>> MarkerCell1Ds;  //mappa marker → lista di segmenti (Cell1D)
      
 };
+
 }

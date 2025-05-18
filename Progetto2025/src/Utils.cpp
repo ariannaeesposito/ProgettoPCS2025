@@ -261,7 +261,7 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
               }
 // lavoro su matrice vertici
           mesh.M2D_vertici.reserve(mesh.Dim2D);
-          vector<int> linea1;
+          vector<unsigned int> linea1;
           linea1.resize(n_vertici_spigoli);// uso resize per allocare la memoria
           for (unsigned int j = 0; j < n_vertici_spigoli ; j++)
           {
@@ -274,7 +274,7 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
           convertitore >> n_vertici_spigoli;
           // lavoro su matrice spigoli
           mesh.M2D_spigoli.reserve(mesh.Dim2D);    
-          vector<int> linea2;
+          vector<unsigned int> linea2;
           linea2.reserve(n_vertici_spigoli);
           for (unsigned int j = 0; j < n_vertici_spigoli ; j++)
           {

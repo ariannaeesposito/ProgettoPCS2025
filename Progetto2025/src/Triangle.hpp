@@ -9,8 +9,8 @@ using namespace Eigen;
 
 namespace PoligonalLibrary {
 
-DA CAMBIARE TUTTOOOOO
-CI SONO SOLO POCHE COSE FATTE BENE
+//DA CAMBIARE TUTTOOOOO
+//CI SONO SOLO POCHE COSE FATTE BENE
 
 struct TriangularMesh
 {
@@ -28,7 +28,9 @@ struct TriangularMesh
     vector<vector<unsigned int>> Cell2DsVertices;
     vector<vector<unsigned int>> Cell2DsEdges;
 
-    map<Vector3d<unsigned int> , unsigned int> coordinate_punti;  
+    
+    //map< Vector3d , unsigned int> coordinate_punti;  
+    map<Vector3d, unsigned int, Vector3dComparator> coordinate_punti;
 
     map<unsigned int,list <unsigned int>> MarkerCell1Ds;  //mappa marker → lista di segmenti (Cell1D)
      

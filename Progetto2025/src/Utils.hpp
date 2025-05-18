@@ -2,7 +2,7 @@
 
 #include<vector>
 #include <iostream>
-#include "PolygonalMesh.hpp"
+#include "Polygon.hpp"
 #include "UCDUtilities.hpp"
 
 using namespace std;
@@ -21,7 +21,7 @@ namespace PolygonalLibrary
     void triangolazione1(PolygonalMesh& mesh);
     void triangolazione2(PolygonalMesh& mesh);
 
-    unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord);
+    // unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord);
  
  
 }

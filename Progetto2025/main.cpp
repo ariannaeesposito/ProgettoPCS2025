@@ -1,5 +1,4 @@
-int main()
-{
+
 	#include <iostream>
 	#include "Polygon.hpp"
 	#include "Utils.hpp"
@@ -10,20 +9,24 @@ int main()
 	using namespace PolygonalLibrary;
 	
 	int main(int dim ,char* argv[])
+
 	{
-		PolygonalMesh mesh;
-		cout << input_solido_platonico(mesh, dim, argv) << endl;
-	
-		if(!input_solido_platonico(mesh, dim, argv));
+		PolygonalMesh mesh; 
+
+		if(!input_solido_platonico(mesh, dim, argv))
 		{
-			cerr << "Errorore" << endl;
+			cerr << "Error Input non imported successfully" << endl;
 			return 1;
 		}
-	
-		if(!ImportMesh(mesh))
+		else
 		{
-			cerr << "file not found" << endl;
-			cout<<"ciao"<< endl;
+			cout << "Input imported successfully" << endl;
+		}
+
+		if(!ImportMesh(mesh)){
+
+			cerr << "Error File not found" << endl;
+
 			return 1;
 		}
 		else
@@ -39,8 +42,8 @@ int main()
 								  mesh.M1D);
 	
 	
-	return 0;
+	 return 0;
 	
-	}
+		}
 	
-	}
+	

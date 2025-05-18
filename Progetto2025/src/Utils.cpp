@@ -17,14 +17,14 @@ namespace PolygonalLibrary
 
 {
 bool input_solido_platonico(PolygonalMesh& mesh, int dim ,char* argv[]){
-cout << "ciao"<< endl;
-cout << "dim = " << dim << endl;
+
 if (dim !=5)
     {
         cout << "Error: the number of vertices is not correct" << endl;
         return false;
     }
     int p, q, b, c;  
+    int flag = 0;
     istringstream convert0(argv[1]);
     convert0 >> p;
     istringstream convert1(argv[2]);
@@ -33,11 +33,7 @@ if (dim !=5)
     convert2 >> b;
     istringstream convert3(argv[4]);
     convert3 >> c;
-    cout << "p = " << p << endl;
-    cout << "q = " << q << endl;
-    cout << "b = " << b << endl;
-    cout << "c = " << c << endl;
-    int flag = 0;
+
 if (p==3){
     switch (q)
     {
@@ -57,60 +53,64 @@ if (p==3){
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
         break;
     default:
-        cout << "errore f" << endl;
+        cerr << " p ammissibile ma q no" << endl;
         return false;
         break;
     }
-    flag = 1;
-}
-cout << "flag = " << flag << endl;
-if (q==3 && p!=3){
-switch (p)
-{
-case 4:
-    mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
-    mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv";
-    mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
-    break;
-case 5:
-    mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
-    mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
-    mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
-    break;
-default:
-    cout << "errore q" << endl;
-    return false;
-}
 flag = 1;
 }
+if (q==3 && p!=3){
+    switch (p)
+    {
+    case 4:
+        mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
+        mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv";
+        mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
+        break;
+    case 5:
+        mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
+        mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
+        mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
+        break;
+    default:
+        cerr << "q ammissibile ma p no" << endl;
+        return false;
+        break;
+    }
+flag = 1;
+}
+
 if (flag == 0){
-    cerr << p << "," << q << "non è un solido platonico"<< endl;
-    cout << "errore flag pq" << endl;
+    cerr << "q e p non ammissibili" << endl;
     return false;
 }
+
 int classe;
+
 flag = 0;
+
 if (b==0 && c >= 1){
     mesh.classe = 1;
 	mesh.d=c;
     flag = 1;
 }
 if (c==0 && b >= 1){
-	mesh.classe=1;
+	mesh.classe = 1;
 	mesh.d=b;
 	flag=1;
 }
-
-if ((b==c && b >= 1)){
+if (b==c && b >= 1){
     mesh.classe = 2;
+    mesh.d=b;
     flag = 1;
 }
+
 if (flag == 0){
-    cerr << b << "," << c << " non sono triangolazioni possibili" << endl;
-    cout << "errore flag bc" << endl;
+    cerr <<"b e c Non sono triangolazioni possibili" << endl;
     return false;
 }
-cout << "arrivati qui" << endl;
+
+cout << flag << endl;
 
 return true;
 }
@@ -292,14 +292,8 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
     return true;
     }
 
-void triangolazione(PolygonalMesh& mesh){
-	if (mesh.classe ==1){
-		triangolazione1(mesh);
-	}
-	else{
-		triangolazione2(mesh);
-	}
-}
+//struct per comparare ( nella mappa srve qualcosa che abbia implementato in se loperatore di disuguaglianza)
+
 
 void triangolazione1(PolygonalMesh& mesh){
 	unsigned int facce = mesh.Dim2D;
@@ -315,9 +309,6 @@ void triangolazione1(PolygonalMesh& mesh){
 	}
 }
 
-void triangolazione2(PolygonalMesh& mesh){
-	
-}
 
 //struct per comparare ( nella mappa srve qualcosa che abbia implementato in se loperatore di disuguaglianza)
 
@@ -332,6 +323,7 @@ void triangolazione2(PolygonalMesh& mesh){
 };*/
 
 unsigned int accedimappa(PoligonalLibrary::TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d& coord){
+
 
 	double tol = pow(10,-15); //definiamo tolleranza
 

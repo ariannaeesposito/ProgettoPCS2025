@@ -17,7 +17,7 @@ struct Vector3dComparator {
         }
         return false;
     }
-}
+};
 //DA CAMBIARE TUTTOOOOO
 //CI SONO SOLO POCHE COSE FATTE BENE
 

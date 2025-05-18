@@ -9,6 +9,7 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
+#include "Triangle.hpp"
 
 using namespace std;
 using namespace Eigen;
@@ -324,8 +325,7 @@ void triangolazione1(PolygonalMesh& mesh){
 
 unsigned int accedimappa(PoligonalLibrary::TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d& coord){
 
-
-	double tol = pow(10,-15); //definiamo tolleranza
+double tol = pow(10,-15); //definiamo tolleranza
 
     //controlliamo se gia presente il puntio 
 

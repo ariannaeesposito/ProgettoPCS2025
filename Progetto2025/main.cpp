@@ -23,6 +23,7 @@ int main()
 		if(!ImportMesh(mesh))
 		{
 			cerr << "file not found" << endl;
+			cout<<"ciao"<< endl;
 			return 1;
 		}
 		else

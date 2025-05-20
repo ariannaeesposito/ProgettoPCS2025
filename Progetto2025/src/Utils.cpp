@@ -23,7 +23,8 @@ if (argc !=5)
         cout << "Error: the number of input is not correct" << endl;
         return false;
     }
-    int p, q, b, c;  
+
+    int p, q, b, c, V, E, F, T;  
     int flag = 0;
     istringstream convert0(argv[1]);
     convert0 >> p; //numero di lati per faccia
@@ -44,7 +45,6 @@ if (p==3){ //facce triangolari
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv"; 
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
-
         break;
     case 4: //ottaedro 
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_ottaedro.csv";
@@ -63,8 +63,8 @@ if (p==3){ //facce triangolari
     }
 
 flag = 1;
-
 } 
+
 if (q==3 && p!=3){ //duale di un solido a facce triangolari
 
     switch (p)
@@ -73,15 +73,11 @@ if (q==3 && p!=3){ //duale di un solido a facce triangolari
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
-        mesh.p=3;
-        mesh.q=4;
         break;
     case 5: //dodecaedro -> icosaedro duale
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
-        mesh.p=3;
-        mesh.q=5;
         break;
     default:
         cerr << "q ammissibile ma p no" << endl;
@@ -101,12 +97,12 @@ if (flag == 0){
 flag = 0;
 
 //Determinimo la classe della triangolazione
+T = b*b + b*c + c*c;
 
 if ((b==0 && c >= 1) ||(c==0 && b >= 1)){
     mesh.classe = 1;
 	mesh.d=max(b,c);
 
-    int T = b*b + b*c + c*c;
     switch (q) {
     case 3:
         V = 2*T + 2;
@@ -123,22 +119,23 @@ if ((b==0 && c >= 1) ||(c==0 && b >= 1)){
         E = 30*T;
         F = 20*T;
         break;
-}
-
-
-
-    mesh.n_spigoli = (mesh.d-1)*(6*mesh.q/(6-3*mesh.q+2*mesh.p)); //quanti spigoli verranno creati sulla superficie triangolata
-    
-    unsigned int sum = mesh.n_spigoli*(mesh.d-1); // punti sui nuovi spigoli
-
-    for (unsigned int i = 2; i < mesh.d; i++) //Aggiunge anche punti interni 
-    {
-        sum += i;
     }
+    mesh.V = V;
+    mesh.E = E;
+    mesh.F = F;
+    // mesh.n_spigoli = (mesh.d-1)*(6*mesh.q/(6-3*mesh.q+2*mesh.p)); //quanti spigoli verranno creati sulla superficie triangolata
     
-    mesh.pt_totali = sum;
+    // unsigned int sum = mesh.n_spigoli*(mesh.d-1); // punti sui nuovi spigoli
+
+    // for (unsigned int i = 2; i < mesh.d; i++) //Aggiunge anche punti interni 
+    // {
+    //     sum += i;
+    // }
+    
+    // mesh.pt_totali = sum;
     flag = 1;
 }
+
 if (b==c && b >= 1){
     mesh.classe = 2;
     mesh.d=b;
@@ -150,7 +147,6 @@ if (flag == 0){
     return false;
 }
 
-cout << flag << endl;
 
 return true;
 }
@@ -193,7 +189,7 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
 
 
     // dobbimao fare la matrice di dimensione 3xnumnero di lunti totale
-    mesh.M0D = Eigen::MatrixXd::Zero(3, mesh.pt_totali); 
+    mesh.M0D = Eigen::MatrixXd::Zero(3, mesh.V); 
 // voglio stampare la lista
 
     for (string& li : lista_dim) // itero una lista
@@ -209,9 +205,11 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
               (*it).second.push_back(id);//memoriazza gli id nei marker gia presenti
         else
             mesh.marker0D.insert({marker, {id}});//memoriazza gli id nei marker
-        }
+    }
 
     }
+    // cout << "M0D" << endl;
+
 return true;
 }
 
@@ -387,13 +385,15 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     unsigned int e = Pmesh.d+1;// numero di punti per ogni spigolo
 
     Tmesh.M_pt_spigoli= MatrixXd::Zero(Pmesh.Dim1D,e); //matrice che conterrà l'ID del j-esimo punto sul i-esimo spigolo.
-    
+    // stampa M_pt_spigoli
+   
     double lunghezza = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(e-1); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
+    
     //assumiamo che tutti gli spigoli abbiano lunghezza uguale (giusto per solidi platonici)
 
     for (unsigned int i = 0; i < Pmesh.Dim1D; i++) // lo faccio per ogni spigolo
 
-    {   //inserisce il primo e ultimo punto
+    {  
         Tmesh.M_pt_spigoli(i,0) = Pmesh.M1D(0,i); // ID punto iniziale
         Tmesh.M_pt_spigoli(i,e-1) = Pmesh.M1D(1,i); // ID punto finale
 
@@ -403,9 +403,9 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
 
         //Creiamo i punti intermedi lungo lo spigolo
         for (unsigned int j = 1; j < e-1; j++) // ci muoviamo lungo interno saltando il primo e lultimo 
-        {   
-            unsigned int id = n+i*(e-2)+j; //id punti intermedi  :n è l'offset per partire dopo i vertici iniziali, i * (e - 2) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
-            
+        {               
+
+            unsigned int id = n+i*(e-2)+j-1; //id punti intermedi  :n è l'offset per partire dopo i vertici iniziali, i * (e - 2) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
             Tmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi nella matrice degli spigoli TOTALI
             Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
 
@@ -414,7 +414,26 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
             Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
     }
-    return true;
+
+
+    // stampa matrice M_pt_spigoli
+    cout << "M_pt_spigoli" << endl;
+    for (unsigned int i = 0; i < Pmesh.Dim1D; i++)
+    {
+        for (unsigned int j = 0; j < e; j++)
+        {
+            cout << Tmesh.M_pt_spigoli(i,j) << " ";
+        }
+        cout << endl;
+    }
+
+    // stampa martice M0D 
+    cout << "M0D" << endl;
+    for (unsigned int i = 0; i < Pmesh.V; i++)
+    {
+        cout << Pmesh.M0D(0,i) << " " << Pmesh.M0D(1,i) << " " << Pmesh.M0D(2,i) << endl ;
+    }
+return true;
 
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli

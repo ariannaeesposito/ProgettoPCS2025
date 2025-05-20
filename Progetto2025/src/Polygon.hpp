@@ -21,7 +21,9 @@ namespace PolygonalLibrary{
         vector<unsigned int> Cell2DsId;
 
         unsigned int classe;
-        unsigned int d , q , p ;
+        unsigned int d , q , p;
+        unsigned int pt_totali;
+        unsigned int n_spigoli;
         
         string nomefile0;
         string nomefile1;

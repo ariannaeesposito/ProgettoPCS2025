@@ -9,7 +9,6 @@
 #include <cmath>
 #include <algorithm>
 #include <string>
-#include "Triangle.hpp"
 
 using namespace std;
 using namespace Eigen;
@@ -34,6 +33,8 @@ if (dim !=5)
     convert2 >> b;
     istringstream convert3(argv[4]);
     convert3 >> c;
+    mesh.p = p;
+    mesh.q = q;
 
 if (p==3){
     switch (q)
@@ -67,11 +68,15 @@ if (q==3 && p!=3){
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
+        mesh.p=3;
+        mesh.q=4;
         break;
     case 5:
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
+        mesh.p=3;
+        mesh.q=5;
         break;
     default:
         cerr << "q ammissibile ma p no" << endl;
@@ -86,19 +91,19 @@ if (flag == 0){
     return false;
 }
 
-int classe;
-
 flag = 0;
 
-if (b==0 && c >= 1){
+if ((b==0 && c >= 1) ||(c==0 && b >= 1)){
     mesh.classe = 1;
-	mesh.d=c;
+	mesh.d=max(b,c);
+    mesh.n_spigoli = (mesh.d-1)*(6*mesh.q/(6-3*mesh.q+2*mesh.p));
+    unsigned int sum = mesh.n_spigoli*(mesh.d-1);
+    for (unsigned int i = 2; i < mesh.d; i++)
+    {
+        sum += i;
+    }
+    mesh.pt_totali = sum;
     flag = 1;
-}
-if (c==0 && b >= 1){
-	mesh.classe = 1;
-	mesh.d=b;
-	flag=1;
 }
 if (b==c && b >= 1){
     mesh.classe = 2;
@@ -152,7 +157,9 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
         return false;
     }
 
-    mesh.M0D = Eigen::MatrixXd::Zero(3, mesh.Dim0D); 
+
+    // dobbimao fare la matrice di dimensione 3xnumnero di lunti totale
+    mesh.M0D = Eigen::MatrixXd::Zero(3, mesh.pt_totali); 
 // voglio stampare la lista
 
     for (string& li : lista_dim) // itero una lista
@@ -160,7 +167,7 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
         replace(li.begin(), li.end(), ';', ' ');
         istringstream convertitore(li);
         unsigned int id,marker;
-        convertitore >> id >> marker >> mesh.M0D(0,id) >> mesh.M0D(1,id) >> mesh.M0D(2,id)   ;
+        convertitore >> id >> marker >> mesh.M0D(0,id) >> mesh.M0D(1,id) >> mesh.M0D(2 ,id)   ;
     if (marker != 0)
     {
         auto it = mesh.marker0D.find(marker);
@@ -261,13 +268,9 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
                     mesh.marker2D.insert({marker, {id}});//memoriazza g
               }
 // lavoro su matrice vertici
-
           mesh.M2D_vertici.reserve(mesh.Dim2D);
-
           vector<unsigned int> linea1;
-
           linea1.resize(n_vertici_spigoli);// uso resize per allocare la memoria
-
           for (unsigned int j = 0; j < n_vertici_spigoli ; j++)
           {
             convertitore >> linea1[j];
@@ -281,35 +284,17 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
           mesh.M2D_spigoli.reserve(mesh.Dim2D);    
           vector<unsigned int> linea2;
           linea2.reserve(n_vertici_spigoli);
-          for (unsigned int j = 0 ; j < n_vertici_spigoli ; j++)
+          for (unsigned int j = 0; j < n_vertici_spigoli ; j++)
           {
             convertitore >> linea2[j];
           }
 
           mesh.M2D_spigoli.push_back(linea2);
-
-          }
+          
+        }
         
     return true;
     }
-
-//struct per comparare ( nella mappa srve qualcosa che abbia implementato in se loperatore di disuguaglianza)
-
-
-void triangolazione1(PolygonalMesh& mesh){
-	unsigned int facce = mesh.Dim2D;
-	for (unsigned int i=0; i<facce; i++) { // i è la faccia
-
-		unsigned int Aid = mesh.M2D_vertici[i][0];
-		unsigned int Bid = mesh.M2D_vertici[i][1];
-		unsigned int Cid = mesh.M2D_vertici[i][2];
-
-		Vector3d Acoord = mesh.M0D.col(Aid);
-		Vector3d Bcoord = mesh.M0D.col(Bid);
-		Vector3d Ccoord = mesh.M0D.col(Cid);
-	}
-}
-
 
 //struct per comparare ( nella mappa srve qualcosa che abbia implementato in se loperatore di disuguaglianza)
 
@@ -323,30 +308,30 @@ void triangolazione1(PolygonalMesh& mesh){
     }
 };*/
 
-unsigned int accedimappa(PoligonalLibrary::TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d& coord){
+// unsigned int accedimappa(PoligonalLibrary::TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d& coord){
 
-double tol = pow(10,-15); //definiamo tolleranza
+// 	double tol = pow(10,-15); //definiamo tolleranza
 
-    //controlliamo se gia presente il puntio 
+//     //controlliamo se gia presente il puntio 
 
-	for (const auto& coppia : mesh.coordinate_punti){ //iteriamo sulla mappa
-		double diff = (coppia.first - coord).norm();
-    //calcoliamo la differnaza tra i due set di coordinate
-		if (diff < tol){ //se sono vicine allora le consideriamo le stesse
-			return coppia.second;  //restituiamo l'id associato a quelle coordinate ( gia presente )
-		}
-	}
-	//se non c'è nella mappa lo creiamo nuovo 
+// 	for (const auto& coppia : mesh.coordinate_punti){ //iteriamo sulla mappa
+// 		double diff = (coppia.first - coord).norm();
+//     //calcoliamo la differnaza tra i due set di coordinate
+// 		if (diff < tol){ //se sono vicine allora le consideriamo le stesse
+// 			return coppia.second;  //restituiamo l'id associato a quelle coordinate ( gia presente )
+// 		}
+// 	}
+// 	//se non c'è nella mappa lo creiamo nuovo 
 
-	unsigned int dim = Pmesh.Dim0D; 
-    mesh.coordinate_punti[coord] = dim;       // assegna nuovo ID al punto. Inserisce coord come nuova chiave nella mappa coordinate_punti, con valore dim (cioè l’ID).
-    Pmesh.Dim0D += 1;
+// 	unsigned int dim = Pmesh.Dim0D; 
+//     mesh.coordinate_punti[coord] = dim;       // assegna nuovo ID al punto. Inserisce coord come nuova chiave nella mappa coordinate_punti, con valore dim (cioè l’ID).
+//     Pmesh.Dim0D += 1;
 
-    Pmesh.M0D(0, dim) = coord(0);    //Salva le coordinate del nuovo punto nella matrice M0D
-    Pmesh.M0D(1, dim) = coord(1);
-    Pmesh.M0D(2, dim) = coord(2);
+//     Pmesh.M0D(0, dim) = coord(0);    //Salva le coordinate del nuovo punto nella matrice M0D
+//     Pmesh.M0D(1, dim) = coord(1);
+//     Pmesh.M0D(2, dim) = coord(2);
 
-    return dim;
+//     return dim;
     
     
   /*unsigned int dim = Pmesh.Dim0D; //dim corrente
@@ -357,7 +342,31 @@ double tol = pow(10,-15); //definiamo tolleranza
 	Pmesh.M0D(1, dim+1)=coord(1);
 	Pmesh.M0D(2, dim+1)=coord(2);
 	return dim+1;*/
+
+
+
+bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
+{   
+    unsigned int n = Pmesh.Dim0D; //numero di punti
+    unsigned int e = Pmesh.d+1;//numero di punti per ogni spigolo
+    Tmesh.M_pt_spigoli= Eigen::MatrixXd::Zero(Pmesh.Dim1D,e); //matrice che contiene i punti degli spigoli della mesh
+    double lunghezza = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(e-1); //lunghezza spigolo prendendo i primi due punti dello spigolo zero
+    for (unsigned int i = 0; i < Pmesh.Dim1D; i++)
+    {
+        Tmesh.M_pt_spigoli(i,0) = Pmesh.M1D(0,i);//inserisce il primo e ultimo punto
+        Tmesh.M_pt_spigoli(i,e-1) = Pmesh.M1D(1,i);
+        Vector3d Acoord=Pmesh.M0D.col(Pmesh.M1D(0,i)); //coordinate primo punto
+        Vector3d Bcoord=Pmesh.M0D.col(Pmesh.M1D(1,i)); //coordinate secondo punto
+        for (unsigned int j = 1; j < e-1; j++)
+        {   
+            unsigned int id = n+i*(e-2)+j; //id punti intermedi
+            Tmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi
+            Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
+            Vector3d coord = Acoord + versore * double(j) * lunghezza; //coordinate punti intesssrmedi
+            Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi
+        }
+    }
+    return true;
 }
 
 }
-

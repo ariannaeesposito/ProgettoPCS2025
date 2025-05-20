@@ -7,24 +7,14 @@ using namespace std;
 using namespace Eigen;
 
 
-namespace PoligonalLibrary {
+namespace PolygonalLibrary {
 
-struct Vector3dComparator {
-    bool operator()(const Vector3d& a, const Vector3d& b) const {
-        for (int i = 0; i < 3; ++i) {
-            if (a[i] < b[i]) return true;
-            if (a[i] > b[i]) return false;
-        }
-        return false;
-    }
-};
 //DA CAMBIARE TUTTOOOOO
 //CI SONO SOLO POCHE COSE FATTE BENE
 
 struct TriangularMesh
 {
    
-    
     vector<unsigned int> Cell0DsId;
     vector<unsigned int> Cell1DsId;
     vector<unsigned int> Cell2DsId;
@@ -39,10 +29,14 @@ struct TriangularMesh
 
     
     //map< Vector3d , unsigned int> coordinate_punti;  
-    map<Vector3d, unsigned int, Vector3dComparator> coordinate_punti;
+    //map<Vector3d, unsigned int, Vector3dComparator> coordinate_punti;
 
     map<unsigned int,list <unsigned int>> MarkerCell1Ds;  //mappa marker → lista di segmenti (Cell1D)
+
+    MatrixXd M_pt_spigoli; // matrice che contiene i punti degli spigoli della mesh
+
+
+
      
 };
-
 }

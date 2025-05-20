@@ -3,6 +3,7 @@
 #include<vector>
 #include <iostream>
 #include "Polygon.hpp"
+#include "Triangle.hpp"
 #include "UCDUtilities.hpp"
 
 using namespace std;
@@ -17,9 +18,12 @@ namespace PolygonalLibrary
     bool ImportCell1Ds(PolygonalMesh& mesh);
     bool ImportCell2Ds(PolygonalMesh& mesh);
 
-    void triangolazione(PolygonalMesh& mesh);
-    void triangolazione1(PolygonalMesh& mesh);
-    void triangolazione2(PolygonalMesh& mesh);
+    //void triangolazione(PolygonalMesh& mesh);
+    // void triangolazione1(PolygonalMesh& mesh);
+    // void triangolazione2(PolygonalMesh& mesh);
+
+    bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh);
+
 
     // unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord);
  

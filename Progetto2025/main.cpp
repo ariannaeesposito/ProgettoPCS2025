@@ -1,5 +1,4 @@
-
-	#include <iostream>
+#include <iostream>
 	#include "Polygon.hpp"
 	#include "Utils.hpp"
 	#include "UCDUtilities.hpp"
@@ -9,9 +8,11 @@
 	using namespace PolygonalLibrary;
 	
 	int main(int dim ,char* argv[])
-
 	{
-		PolygonalMesh mesh; 
+		PolygonalMesh mesh;
+		TriangularMesh Tmesh;
+
+
 
 		if(!input_solido_platonico(mesh, dim, argv))
 		{
@@ -23,16 +24,18 @@
 			cout << "Input imported successfully" << endl;
 		}
 
-		if(!ImportMesh(mesh)){
-
+		if(!ImportMesh(mesh))
+		{
 			cerr << "Error File not found" << endl;
-
 			return 1;
 		}
 		else
 		{
 			cout << "File imported successfully" << endl;
 		}
+
+		Inizializzazione_vertici(mesh ,Tmesh);
+
 		
 		Gedim::UCDUtilities utilities;
 		utilities.ExportPoints("./Cell0Ds.inp",
@@ -42,8 +45,6 @@
 								  mesh.M1D);
 	
 	
-	 return 0;
+	return 0;
 	
-		}
-	
-	
+	}

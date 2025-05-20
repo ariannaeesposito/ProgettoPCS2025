@@ -16,40 +16,42 @@ using namespace Eigen;
 namespace PolygonalLibrary
 
 {
-bool input_solido_platonico(PolygonalMesh& mesh, int dim ,char* argv[]){
+bool input_solido_platonico(PolygonalMesh& mesh, int argc ,char* argv[]){
 
-if (dim !=5)
+if (argc !=5)
     {
-        cout << "Error: the number of vertices is not correct" << endl;
+        cout << "Error: the number of input is not correct" << endl;
         return false;
     }
     int p, q, b, c;  
     int flag = 0;
     istringstream convert0(argv[1]);
-    convert0 >> p;
+    convert0 >> p; //numero di lati per faccia
     istringstream convert1(argv[2]);
-    convert1 >> q;
+    convert1 >> q; //numero di facce che si incontrano in ogni vertice
     istringstream convert2(argv[3]);
-    convert2 >> b;
+    convert2 >> b; //parametro triangolazione geodetica
     istringstream convert3(argv[4]);
-    convert3 >> c;
-    mesh.p = p;
+    convert3 >> c; //parametro triangolazione geodetica
+
+    mesh.p = p; // riempiamo il contenitore mesh con i dati di input
     mesh.q = q;
 
-if (p==3){
+if (p==3){ //facce triangolari
     switch (q)
     {
-    case 3:
+    case 3: //tetraedro
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv"; 
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
+
         break;
-    case 4:
+    case 4: //ottaedro 
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_ottaedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_ottaedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_ottaedro.csv";
         break;
-    case 5:
+    case 5: //icosaedro
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
@@ -59,19 +61,22 @@ if (p==3){
         return false;
         break;
     }
+
 flag = 1;
-}
-if (q==3 && p!=3){
+
+} 
+if (q==3 && p!=3){ //duale di un solido a facce triangolari
+
     switch (p)
     {
-    case 4:
+    case 4: //ottaedro -> tetraedro duale
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
         mesh.p=3;
         mesh.q=4;
         break;
-    case 5:
+    case 5: //dodecaedro -> icosaedro duale
         mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
         mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
         mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
@@ -83,7 +88,9 @@ if (q==3 && p!=3){
         return false;
         break;
     }
+
 flag = 1;
+
 }
 
 if (flag == 0){
@@ -93,15 +100,42 @@ if (flag == 0){
 
 flag = 0;
 
+//Determinimo la classe della triangolazione
+
 if ((b==0 && c >= 1) ||(c==0 && b >= 1)){
     mesh.classe = 1;
 	mesh.d=max(b,c);
-    mesh.n_spigoli = (mesh.d-1)*(6*mesh.q/(6-3*mesh.q+2*mesh.p));
-    unsigned int sum = mesh.n_spigoli*(mesh.d-1);
-    for (unsigned int i = 2; i < mesh.d; i++)
+
+    int T = b*b + b*c + c*c;
+    switch (q) {
+    case 3:
+        V = 2*T + 2;
+        E = 6*T;
+        F = 4*T;
+        break;
+    case 4:
+        V = 4*T + 2;
+        E = 12*T;
+        F = 8*T;
+        break;
+    case 5:
+        V = 10*T + 2;
+        E = 30*T;
+        F = 20*T;
+        break;
+}
+
+
+
+    mesh.n_spigoli = (mesh.d-1)*(6*mesh.q/(6-3*mesh.q+2*mesh.p)); //quanti spigoli verranno creati sulla superficie triangolata
+    
+    unsigned int sum = mesh.n_spigoli*(mesh.d-1); // punti sui nuovi spigoli
+
+    for (unsigned int i = 2; i < mesh.d; i++) //Aggiunge anche punti interni 
     {
         sum += i;
     }
+    
     mesh.pt_totali = sum;
     flag = 1;
 }
@@ -347,26 +381,44 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
 
 bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
 {   
-    unsigned int n = Pmesh.Dim0D; //numero di punti
-    unsigned int e = Pmesh.d+1;//numero di punti per ogni spigolo
-    Tmesh.M_pt_spigoli= Eigen::MatrixXd::Zero(Pmesh.Dim1D,e); //matrice che contiene i punti degli spigoli della mesh
-    double lunghezza = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(e-1); //lunghezza spigolo prendendo i primi due punti dello spigolo zero
-    for (unsigned int i = 0; i < Pmesh.Dim1D; i++)
-    {
-        Tmesh.M_pt_spigoli(i,0) = Pmesh.M1D(0,i);//inserisce il primo e ultimo punto
-        Tmesh.M_pt_spigoli(i,e-1) = Pmesh.M1D(1,i);
-        Vector3d Acoord=Pmesh.M0D.col(Pmesh.M1D(0,i)); //coordinate primo punto
-        Vector3d Bcoord=Pmesh.M0D.col(Pmesh.M1D(1,i)); //coordinate secondo punto
-        for (unsigned int j = 1; j < e-1; j++)
+    unsigned int n = Pmesh.Dim0D; // numero di punti (serve per assegnare ID nuovi ai punti intermedi)
+    
+    //d è il numero di suddivisioni per lato
+    unsigned int e = Pmesh.d+1;// numero di punti per ogni spigolo
+
+    Tmesh.M_pt_spigoli= MatrixXd::Zero(Pmesh.Dim1D,e); //matrice che conterrà l'ID del j-esimo punto sul i-esimo spigolo.
+    
+    double lunghezza = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(e-1); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
+    //assumiamo che tutti gli spigoli abbiano lunghezza uguale (giusto per solidi platonici)
+
+    for (unsigned int i = 0; i < Pmesh.Dim1D; i++) // lo faccio per ogni spigolo
+
+    {   //inserisce il primo e ultimo punto
+        Tmesh.M_pt_spigoli(i,0) = Pmesh.M1D(0,i); // ID punto iniziale
+        Tmesh.M_pt_spigoli(i,e-1) = Pmesh.M1D(1,i); // ID punto finale
+
+        //Prendiamo le coordinate degli estremi
+        Vector3d Acoord=Pmesh.M0D.col(Pmesh.M1D(0,i)); //coordinate primo estremo 
+        Vector3d Bcoord=Pmesh.M0D.col(Pmesh.M1D(1,i)); //coordinate secondo estremo 
+
+        //Creiamo i punti intermedi lungo lo spigolo
+        for (unsigned int j = 1; j < e-1; j++) // ci muoviamo lungo interno saltando il primo e lultimo 
         {   
-            unsigned int id = n+i*(e-2)+j; //id punti intermedi
-            Tmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi
+            unsigned int id = n+i*(e-2)+j; //id punti intermedi  :n è l'offset per partire dopo i vertici iniziali, i * (e - 2) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
+            
+            Tmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi nella matrice degli spigoli TOTALI
             Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
-            Vector3d coord = Acoord + versore * double(j) * lunghezza; //coordinate punti intesssrmedi
-            Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi
+
+            Vector3d coord = Acoord + versore * double(j) * lunghezza; //coordinate punti intermedi
+
+            Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
     }
     return true;
+
+    //Dopo aver eseguito tutta la funzione:
+    //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
+    //M_pt_spigoli ti dirà quali punti sono su ciascuno spigolo (per triangolare le facce)
 }
 
 }

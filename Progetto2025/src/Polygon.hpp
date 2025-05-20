@@ -22,9 +22,14 @@ namespace PolygonalLibrary{
 
         unsigned int classe;
         unsigned int d , q , p;
-        unsigned int pt_totali;
-        unsigned int n_spigoli;
+        unsigned int pt_totali; // V:numero vertici
+        unsigned int n_spigoli; // E:numero spigoli
         
+        int T;             // numero triangoli per faccia
+        
+       
+        int F;             // numero facce
+
         string nomefile0;
         string nomefile1;
         string nomefile2;

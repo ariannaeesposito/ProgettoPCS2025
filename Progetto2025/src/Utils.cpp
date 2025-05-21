@@ -418,6 +418,7 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
 
     // stampa matrice M_pt_spigoli
     cout << "M_pt_spigoli" << endl;
+
     for (unsigned int i = 0; i < Pmesh.Dim1D; i++)
     {
         for (unsigned int j = 0; j < e; j++)
@@ -433,11 +434,159 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     {
         cout << Pmesh.M0D(0,i) << " " << Pmesh.M0D(1,i) << " " << Pmesh.M0D(2,i) << endl ;
     }
-return true;
+    return true;
 
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
     //M_pt_spigoli ti dirà quali punti sono su ciascuno spigolo (per triangolare le facce)
 }
 
+/*bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
+
+    unsigned int d = Pmesh.d;
+    unsigned int n_attuale = Pmesh.M0D.cols(); // n. punti attuali ( colonne della matrice delle coordinate)
+    unsigned int id_punto = n_attuale;
+
+    vector<Vector3d> nuovi_punti;
+
+    //ciclo sulle facce
+
+    for (const auto& faccia : Pmesh.M2D_vertici)
+    {   
+        // ID dei 3 vertici della faccia triangolare.
+        unsigned int A_id = faccia[0];
+        unsigned int B_id = faccia[1];
+        unsigned int C_id = faccia[2];
+
+        //coordinate 3D di quei vertici.
+        Vector3d A = Pmesh.M0D.col(A_id);
+        Vector3d B = Pmesh.M0D.col(B_id);
+        Vector3d C = Pmesh.M0D.col(C_id);
+
+        for (unsigned int i = 1; i < d; ++i)
+        {
+            for (unsigned int j = 1; j < d - i; ++j) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
+            {
+                unsigned int k = d - i - j;
+
+                // parametri della combinazione convessa , sommano a 1 ; coordinate baricentriche
+                double a = double(i) / d; 
+                double b = double(j) / d;
+                double c = double(k) / d;
+
+                Vector3d P = a * A + b * B + c * C;
+                nuovi_punti.push_back(P);
+            }
+        }
+    }
+
+    // Aggiungiamo questi punti a M0D
+    unsigned int n_nuovi = nuovi_punti.size();
+    Pmesh.M0D.conservativeResize(3, id_punto + n_nuovi);
+    for (unsigned int i = 0; i < n_nuovi; ++i)
+    {
+        Pmesh.M0D.col(id_punto + i) = nuovi_punti[i];
+    }
+
+    cout << "Aggiunti " << n_nuovi << " punti interni" << endl;
+    return true;
+}*/
+bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
+
+    unsigned int d = Pmesh.d;
+    unsigned int num_facce = Pmesh.Dim2D;
+
+    unsigned int id_pt_attuale = Pmesh.M0D.cols(); // ← corretto punto di partenza
+
+// E poi:
+unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
+Pmesh.M0D.conservativeResize(3, id_pt_attuale + n_nuovi_punti);
+    //unsigned int id_pt_attuale = Pmesh.V-num_facce*(d-1)*(d-2)/2 ; // M0D già dimemsioni corrette dobbiamo trovare prima colonna nulla// n. punti attuali ( colonne della matrice delle coordinate)
+    unsigned int id_attuale_triangoli = 0;
+
+    Pmesh.M2D = MatrixXd::Zero(6,Pmesh.F);
+
+    vector<Vector3d> nuovi_punti;
+
+    //ciclo sulle facce
+
+    for (unsigned int faccia_id =0;  faccia_id<num_facce;  faccia_id++)
+    {   
+        // ID dei 3 vertici della faccia triangolare.
+        unsigned int A_id = Pmesh.M2D_vertici[faccia_id][0];
+        unsigned int B_id = Pmesh.M2D_vertici[faccia_id][1];
+        unsigned int C_id = Pmesh.M2D_vertici[faccia_id][2];
+
+        //coordinate 3D di quei vertici.
+        Vector3d A = Pmesh.M0D.col(A_id);
+        Vector3d B = Pmesh.M0D.col(B_id);
+        Vector3d C = Pmesh.M0D.col(C_id);
+
+        Vector3d versore_orizzontale = (B-A) / (B-A).norm() ;
+        Vector3d vettore_orizzontale = versore_orizzontale*d;
+
+        Vector3d versore_obliquo = (C-A) / (C-A).norm() ;
+        Vector3d vettore_obliquo = versore_obliquo*d;
+        
+        unsigned int AB_id = Pmesh.M2D_spigoli[faccia_id][0]; //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli.
+        unsigned int BC_id = Pmesh.M2D_spigoli[faccia_id][1];
+        unsigned int CA_id = Pmesh.M2D_spigoli[faccia_id][2];
+
+
+        VectorXd AB = Tmesh.M_pt_spigoli.row(AB_id);
+        VectorXd BC = Tmesh.M_pt_spigoli.row(BC_id);
+        VectorXd CA = Tmesh.M_pt_spigoli.row(CA_id);
+
+        // orientiamo i vertici 
+        if (AB[0]==B_id){
+            AB = AB.reverse();
+        }
+        if (BC[0]==C_id){
+            BC = BC.reverse();
+        }
+        if (CA[0]==C_id){
+            CA = CA.reverse();
+        }
+        VectorXd base = AB;
+        
+        VectorXd tetto;
+        
+
+        for (unsigned int i = 0; i < d; ++i){
+
+            Pmesh.M2D(0,id_attuale_triangoli)=base[0];//AB dovrà essere sovrascritto dalla nuova base
+            Pmesh.M2D(1,id_attuale_triangoli)=base[1];
+            Pmesh.M2D(2,id_attuale_triangoli)=CA[i+1];
+            id_attuale_triangoli++;
+            unsigned int dim = base.size();
+            tetto.resize(dim-1);
+            tetto[0]=CA[i+1];
+        
+            for (unsigned int j = 1; j < d - i; ++j) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
+            {   
+                if (j == d-i-1){
+                    tetto[j]=BC[i+1];
+                }
+                else{
+                    Vector3d pt = A+(i+1)*vettore_obliquo +j*vettore_orizzontale;
+                    Pmesh.M0D.col(id_pt_attuale) = pt;
+                    tetto[j]=id_pt_attuale;
+                    id_pt_attuale++;
+                }
+                
+                Pmesh.M2D(0,id_attuale_triangoli)=tetto[j-1];//AB dovrà essere sovrascritto dalla nuova base
+                Pmesh.M2D(1,id_attuale_triangoli)=base[j];
+                Pmesh.M2D(2,id_attuale_triangoli)=tetto[j];
+                id_attuale_triangoli++;
+                Pmesh.M2D(0,id_attuale_triangoli)=base[j];//AB dovrà essere sovrascritto dalla nuova base
+                Pmesh.M2D(1,id_attuale_triangoli)=base[j+1];
+                Pmesh.M2D(2,id_attuale_triangoli)=tetto[j];
+                id_attuale_triangoli++;
+            }
+            base.conservativeResize(dim-1);
+            base = tetto;
+        }
+
+}
+}
 }

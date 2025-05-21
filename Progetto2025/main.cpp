@@ -7,14 +7,14 @@
 	using namespace Eigen;
 	using namespace PolygonalLibrary;
 	
-	int main(int dim ,char* argv[])
+	int main(int argc ,char* argv[])
 	{
 		PolygonalMesh mesh;
 		TriangularMesh Tmesh;
 
 
 
-		if(!input_solido_platonico(mesh, dim, argv))
+		if(!input_solido_platonico(mesh, argc, argv))
 		{
 			cerr << "Error Input non imported successfully" << endl;
 			return 1;
@@ -35,6 +35,7 @@
 		}
 
 		Inizializzazione_vertici(mesh ,Tmesh);
+		Inizializzazione_punti_interni(mesh,Tmesh);
 
 		
 		Gedim::UCDUtilities utilities;
@@ -46,5 +47,7 @@
 	
 	
 	return 0;
+
+	
 	
 	}

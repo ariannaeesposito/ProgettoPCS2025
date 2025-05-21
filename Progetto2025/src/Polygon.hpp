@@ -22,7 +22,8 @@ namespace PolygonalLibrary{
 
         unsigned int classe;
         unsigned int d , q , p;
-// V, E, F; // n di vertici totali (con mesh), n spigoli totali (con mesh), n facce di tutti i triangoli (con mesh)
+
+        // V, E, F :  n di vertici totali (con mesh), n spigoli totali (con mesh), n facce di tutti i triangoli (con mesh)
         unsigned int V, E, F, T;   
 
         string nomefile0;
@@ -35,6 +36,8 @@ namespace PolygonalLibrary{
 
         MatrixXd M0D; //coordinate
         MatrixXi M1D; //estremi
+
+        MatrixXd M2D; // triangolini 
 
         vector<vector<unsigned int>> M2D_vertici; // essendo un vector di vector oer accedere ai singoli elt devo utilizzare [][] e non ( , )
         vector<vector<unsigned int>> M2D_spigoli; 

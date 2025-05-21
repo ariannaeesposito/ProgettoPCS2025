@@ -208,7 +208,6 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
     }
 
     }
-    // cout << "M0D" << endl;
 
 return true;
 }
@@ -315,7 +314,7 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
           // lavoro su matrice spigoli
           mesh.M2D_spigoli.reserve(mesh.Dim2D);    
           vector<unsigned int> linea2;
-          linea2.reserve(n_vertici_spigoli);
+          linea2.resize(n_vertici_spigoli);
           for (unsigned int j = 0; j < n_vertici_spigoli ; j++)
           {
             convertitore >> linea2[j];
@@ -323,7 +322,7 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
 
           mesh.M2D_spigoli.push_back(linea2);
           
-        }
+        }     
         
     return true;
     }
@@ -387,7 +386,7 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     Tmesh.M_pt_spigoli= MatrixXd::Zero(Pmesh.Dim1D,e); //matrice che conterrà l'ID del j-esimo punto sul i-esimo spigolo.
     // stampa M_pt_spigoli
    
-    double lunghezza = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(e-1); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
+    Pmesh.lunghezza_lato_triangolino = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(e-1); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
     
     //assumiamo che tutti gli spigoli abbiano lunghezza uguale (giusto per solidi platonici)
 
@@ -409,32 +408,11 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
             Tmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi nella matrice degli spigoli TOTALI
             Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
 
-            Vector3d coord = Acoord + versore * double(j) * lunghezza; //coordinate punti intermedi
+            Vector3d coord = Acoord + versore * double(j) * Pmesh.lunghezza_lato_triangolino; //coordinate punti intermedi
 
             Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
     }
-
-
-    // stampa matrice M_pt_spigoli
-    cout << "M_pt_spigoli" << endl;
-
-    for (unsigned int i = 0; i < Pmesh.Dim1D; i++)
-    {
-        for (unsigned int j = 0; j < e; j++)
-        {
-            cout << Tmesh.M_pt_spigoli(i,j) << " ";
-        }
-        cout << endl;
-    }
-
-    // stampa martice M0D 
-    cout << "M0D" << endl;
-    for (unsigned int i = 0; i < Pmesh.V; i++)
-    {
-        cout << Pmesh.M0D(0,i) << " " << Pmesh.M0D(1,i) << " " << Pmesh.M0D(2,i) << endl ;
-    }
-    return true;
 
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
@@ -492,51 +470,41 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     return true;
 }*/
 bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
-
+    double l = Pmesh.lunghezza_lato_triangolino;
     unsigned int d = Pmesh.d;
     unsigned int num_facce = Pmesh.Dim2D;
-
-    unsigned int id_pt_attuale = Pmesh.M0D.cols(); // ← corretto punto di partenza
-
+    unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
+    unsigned int id_pt_attuale = Pmesh.V - n_nuovi_punti - 1; 
 // E poi:
-unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
-Pmesh.M0D.conservativeResize(3, id_pt_attuale + n_nuovi_punti);
-    //unsigned int id_pt_attuale = Pmesh.V-num_facce*(d-1)*(d-2)/2 ; // M0D già dimemsioni corrette dobbiamo trovare prima colonna nulla// n. punti attuali ( colonne della matrice delle coordinate)
     unsigned int id_attuale_triangoli = 0;
 
     Pmesh.M2D = MatrixXd::Zero(6,Pmesh.F);
 
-    vector<Vector3d> nuovi_punti;
-
     //ciclo sulle facce
 
-    for (unsigned int faccia_id =0;  faccia_id<num_facce;  faccia_id++)
+    for (unsigned int faccia_id =0;  faccia_id < num_facce;  faccia_id++)
     {   
         // ID dei 3 vertici della faccia triangolare.
         unsigned int A_id = Pmesh.M2D_vertici[faccia_id][0];
         unsigned int B_id = Pmesh.M2D_vertici[faccia_id][1];
         unsigned int C_id = Pmesh.M2D_vertici[faccia_id][2];
 
+
         //coordinate 3D di quei vertici.
-        Vector3d A = Pmesh.M0D.col(A_id);
+        Vector3d A = Pmesh.M0D.col(A_id); 
         Vector3d B = Pmesh.M0D.col(B_id);
         Vector3d C = Pmesh.M0D.col(C_id);
-
         Vector3d versore_orizzontale = (B-A) / (B-A).norm() ;
-        Vector3d vettore_orizzontale = versore_orizzontale*d;
-
+        Vector3d vettore_orizzontale = versore_orizzontale * l ;
         Vector3d versore_obliquo = (C-A) / (C-A).norm() ;
-        Vector3d vettore_obliquo = versore_obliquo*d;
-        
+        Vector3d vettore_obliquo = versore_obliquo * l ;
+       
         unsigned int AB_id = Pmesh.M2D_spigoli[faccia_id][0]; //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli.
         unsigned int BC_id = Pmesh.M2D_spigoli[faccia_id][1];
         unsigned int CA_id = Pmesh.M2D_spigoli[faccia_id][2];
-
-
         VectorXd AB = Tmesh.M_pt_spigoli.row(AB_id);
         VectorXd BC = Tmesh.M_pt_spigoli.row(BC_id);
         VectorXd CA = Tmesh.M_pt_spigoli.row(CA_id);
-
         // orientiamo i vertici 
         if (AB[0]==B_id){
             AB = AB.reverse();
@@ -547,12 +515,12 @@ Pmesh.M0D.conservativeResize(3, id_pt_attuale + n_nuovi_punti);
         if (CA[0]==C_id){
             CA = CA.reverse();
         }
-        VectorXd base = AB;
-        
-        VectorXd tetto;
-        
 
-        for (unsigned int i = 0; i < d; ++i){
+        VectorXd base = AB; // vettore di tutti i punti tra A e B
+        VectorXd tetto;
+
+
+        for (unsigned int i = 0; i < d; i ++){
 
             Pmesh.M2D(0,id_attuale_triangoli)=base[0];//AB dovrà essere sovrascritto dalla nuova base
             Pmesh.M2D(1,id_attuale_triangoli)=base[1];
@@ -562,7 +530,7 @@ Pmesh.M0D.conservativeResize(3, id_pt_attuale + n_nuovi_punti);
             tetto.resize(dim-1);
             tetto[0]=CA[i+1];
         
-            for (unsigned int j = 1; j < d - i; ++j) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
+            for (unsigned int j = 1; j < d - i; j ++) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
             {   
                 if (j == d-i-1){
                     tetto[j]=BC[i+1];

@@ -22,7 +22,7 @@ namespace PolygonalLibrary{
 
         unsigned int classe;
         unsigned int d , q , p;
-
+        double lunghezza_lato_triangolino; // numero di spigoli
         // V, E, F :  n di vertici totali (con mesh), n spigoli totali (con mesh), n facce di tutti i triangoli (con mesh)
         unsigned int V, E, F, T;   
 

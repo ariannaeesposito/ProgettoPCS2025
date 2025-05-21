@@ -469,18 +469,21 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     cout << "Aggiunti " << n_nuovi << " punti interni" << endl;
     return true;
 }*/
+
 bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
     double l = Pmesh.lunghezza_lato_triangolino;
     unsigned int d = Pmesh.d;
     unsigned int num_facce = Pmesh.Dim2D;
     unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
-    unsigned int id_pt_attuale = Pmesh.V - n_nuovi_punti - 1; 
+    unsigned int id_pt_attuale = Pmesh.V - n_nuovi_punti; 
 // E poi:
     unsigned int id_attuale_triangoli = 0;
 
     Pmesh.M2D = MatrixXd::Zero(6,Pmesh.F);
 
     //ciclo sulle facce
+    cout << "prova" << endl;
+    cout << Pmesh.Dim2D << endl;
 
     for (unsigned int faccia_id =0;  faccia_id < num_facce;  faccia_id++)
     {   
@@ -505,6 +508,8 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
         VectorXd AB = Tmesh.M_pt_spigoli.row(AB_id);
         VectorXd BC = Tmesh.M_pt_spigoli.row(BC_id);
         VectorXd CA = Tmesh.M_pt_spigoli.row(CA_id);
+
+        cout << "check 1" << endl;
         // orientiamo i vertici 
         if (AB[0]==B_id){
             AB = AB.reverse();
@@ -555,6 +560,19 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
             base = tetto;
         }
 
+
 }
+// stampa cella M0D
+cout << "M0D: " << endl;
+for (unsigned int i = 0; i < Pmesh.M0D.cols(); i++)
+{
+    cout << Pmesh.M0D(0,i) << " " << Pmesh.M0D(1,i) << " " << Pmesh.M0D(2,i) << endl;
 }
+
+return true;
+
+}
+
+
+
 }

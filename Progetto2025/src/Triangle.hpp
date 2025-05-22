@@ -34,6 +34,7 @@ struct TriangularMesh
     map<unsigned int,list <unsigned int>> MarkerCell1Ds;  //mappa marker → lista di segmenti (Cell1D)
 
     MatrixXd M_pt_spigoli; // matrice che contiene i punti degli spigoli della mesh
+	MatrixXd M1D_spigoli_intermedi;
 
 
 

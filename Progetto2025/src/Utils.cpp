@@ -415,15 +415,22 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
         //creiamo gli spigolimedi
         
     }
-    Pmesh.M1D_triangolini = MatrixXd::Zero(2,Pmesh.E);
-        for (unsigned int k=0; k < Pmesh.Dim1; k++)
+		unsigned int id_spigoli= 0;
+		Pmesh.M1D_triangolini = MatrixXd::Zero(2,Pmesh.E);
+		Tmesh.M1D_spigoli_intermedi= MatrixXd::Zero(Pmesh.Dim1D, e-1);
+		
+        for (unsigned int k=0; k < Pmesh.Dim1D; k++)
         {
             for (unsigned int h=0; h < e-1; h++)
             {
-                Pmesh.M1D_triangolini(0,id) = Tmesh.M_pt_spigoli(k,h);
-                Pmesh.M1D_triangolini(1,id) = Tmesh.M_pt_spigoli(k,h+1);
+                Pmesh.M1D_triangolini(0,id_spigoli) = Tmesh.M_pt_spigoli(k,h);
+                Pmesh.M1D_triangolini(1,id_spigoli) = Tmesh.M_pt_spigoli(k,h+1);
+				Tmesh.M1D_spigoli_intermedi(k,h)=id_spigoli;
             }
+			id_spigoli ++;
         }
+		
+		
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
     //M_pt_spigoli ti dirà quali punti sono su ciascuno spigolo (per triangolare le facce)
@@ -519,23 +526,34 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
         VectorXd AB = Tmesh.M_pt_spigoli.row(AB_id);
         VectorXd BC = Tmesh.M_pt_spigoli.row(BC_id);
         VectorXd CA = Tmesh.M_pt_spigoli.row(CA_id);
-
+		
+		VectorXd AB_spigoli = Tmesh.M1D_spigoli_intermedi.row(AB_id);
+		VectorXd BC_spigoli = Tmesh.M1D_spigoli_intermedi.row(BC_id);
+		VectorXd CA_spigoli = Tmesh.M1D_spigoli_intermedi.row(CA_id);
+		
+		
         cout << "check 1" << endl;
         // orientiamo i vertici 
         if (AB[0]==B_id){
             AB = AB.reverse();
+			AB_spigoli = AB_spigoli.reverse();
         }
         if (BC[0]==C_id){
             BC = BC.reverse();
+			BC_spigoli = BC_spigoli.reverse();
         }
         if (CA[0]==C_id){
             CA = CA.reverse();
+			CA_spigoli = CA_spigoli.reverse();
         }
 
         VectorXd base = AB; // vettore di tutti i punti tra A e B
+		VectorXd base_spigoli = AB_spigoli;
         VectorXd tetto;
+		VectorXd tetto_spigoli;
 
-
+		unsigned int flag_spigoli = 0;
+		
         for (unsigned int i = 0; i < d; i ++){
 
             Pmesh.M2D(0,id_attuale_triangoli)=base[0];//AB dovrà essere sovrascritto dalla nuova base
@@ -545,11 +563,17 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
 
             Pmesh.M1D_triangolini(0,id_attuale_spigoli)=base[1];
             Pmesh.M1D_triangolini(1,id_attuale_spigoli)=CA[i+1];
+			
+			
 
-            Pmesh.M2D(2,id_attuale_triangoli)=id_attuale_spigoli; //inserisce l'id spigolo (è) il secondo
-
-            id_attuale_triangoli++;
-            id_attuale_spigoli++;
+            Pmesh.M2D(4,id_attuale_triangoli)=id_attuale_spigoli; //inserisce l'id spigolo (è) il secondo
+			id_attuale_spigoli++;
+			
+			Pmesh.M2D(3,id_attuale_triangoli)=base_spigoli[0];
+            Pmesh.M2D(5,id_attuale_triangoli)=CA_spigoli[i];
+			
+			id_attuale_triangoli++;
+            
 
             unsigned int dim = base.size();
             tetto.resize(dim-1);
@@ -559,6 +583,7 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
             {   
                 if (j == d-i-1){
                     tetto[j]=BC[i+1];
+					flag_spigoli = 1;
                 }
                 else{
                     Vector3d pt = A+(i+1)*vettore_obliquo +j*vettore_orizzontale;
@@ -570,23 +595,52 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
                 Pmesh.M2D(0,id_attuale_triangoli)=tetto[j-1];//AB dovrà essere sovrascritto dalla nuova base
                 Pmesh.M2D(1,id_attuale_triangoli)=base[j];
                 Pmesh.M2D(2,id_attuale_triangoli)=tetto[j];
+				Pmesh.M2D(3,id_attuale_triangoli)=id_attuale_spigoli-1;
+				
+				Pmesh.M1D_triangolini(0,id_attuale_spigoli)=tetto[j-1]; //crea nuovo spigolo superiore
+				Pmesh.M1D_triangolini(1,id_attuale_spigoli)=tetto[j];
+				tetto_spigoli[j-1] = id_attuale_spigoli;
+				id_attuale_spigoli++;
+				Pmesh.M2D(5,id_attuale_triangoli)=id_attuale_spigoli-1;
+				
+				Pmesh.M1D_triangolini(0,id_attuale_spigoli)=base[j]; //crea spoigolo obliquo interno
+				Pmesh.M1D_triangolini(1,id_attuale_spigoli)=tetto[j];
+				id_attuale_spigoli++;
+				Pmesh.M2D(4,id_attuale_triangoli)=id_attuale_spigoli-1;
+				
                 id_attuale_triangoli++;
+				
+				
                 Pmesh.M2D(0,id_attuale_triangoli)=base[j];//AB dovrà essere sovrascritto dalla nuova base
                 Pmesh.M2D(1,id_attuale_triangoli)=base[j+1];
                 Pmesh.M2D(2,id_attuale_triangoli)=tetto[j];
-                id_attuale_triangoli++;>
+				
+				Pmesh.M2D(5,id_attuale_triangoli)=id_attuale_spigoli-1;
+				Pmesh.M2D(3,id_attuale_triangoli)=base_spigoli[j];
+				
+				if (flag_spigoli){
+					Pmesh.M2D(4,id_attuale_triangoli)=BC_spigoli[i];
+				}
+				else{
+				Pmesh.M1D_triangolini(0,id_attuale_spigoli)=base[j+1]; //crea spoigolo obliquo interno
+				Pmesh.M1D_triangolini(1,id_attuale_spigoli)=tetto[j];
+				id_attuale_spigoli++;
+				Pmesh.M2D(4,id_attuale_triangoli)=id_attuale_spigoli-1;
+				}
+				id_attuale_triangoli++;
             }
-            base.conservativeResize(dim-1);
+			flag_spigoli= 0;
+            base.resize(dim-1);
             base = tetto;
         }
 
 
 }
 // stampa cella M0D
-cout << "M0D: " << endl;
-for (unsigned int i = 0; i < Pmesh.M0D.cols(); i++)
+cout << "M2D: " << endl;
+for (unsigned int i = 0; i < Pmesh.M2D.cols(); i++)
 {
-    cout << Pmesh.M0D(0,i) << " " << Pmesh.M0D(1,i) << " " << Pmesh.M0D(2,i) << endl;
+    cout << Pmesh.M0D(0,i) << " " << Pmesh.M0D(1,i) << " " << Pmesh.M0D(2,i)<< Pmesh.M0D(3,i) << " " << Pmesh.M0D(4,i) << " " << Pmesh.M0D(5,i) << endl;
 }
 
 return true;

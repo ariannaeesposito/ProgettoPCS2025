@@ -35,8 +35,8 @@ namespace PolygonalLibrary{
         map <unsigned int, list<unsigned int>> marker2D;
 
         MatrixXd M0D; //coordinate
-        MatrixXi M1D; //estremi
-        MatrixXi M1D_triangolini; // triangolini
+        MatrixXd M1D; //estremi
+        MatrixXd M1D_triangolini; // triangolini
 
         MatrixXd M2D; // triangolini 
 

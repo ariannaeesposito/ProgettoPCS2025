@@ -36,6 +36,7 @@ namespace PolygonalLibrary{
 
         MatrixXd M0D; //coordinate
         MatrixXi M1D; //estremi
+        MatrixXi M1D_triangolini; // triangolini
 
         MatrixXd M2D; // triangolini 
 

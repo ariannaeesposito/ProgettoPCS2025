@@ -412,8 +412,18 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
 
             Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
+        //creiamo gli spigolimedi
+        
     }
-
+    Pmesh.M1D_triangolini = MatrixXd::Zero(2,Pmesh.E);
+        for (unsigned int k=0; k < Pmesh.Dim1; k++)
+        {
+            for (unsigned int h=0; h < e-1; h++)
+            {
+                Pmesh.M1D_triangolini(0,id) = Tmesh.M_pt_spigoli(k,h);
+                Pmesh.M1D_triangolini(1,id) = Tmesh.M_pt_spigoli(k,h+1);
+            }
+        }
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
     //M_pt_spigoli ti dirà quali punti sono su ciascuno spigolo (per triangolare le facce)
@@ -478,6 +488,7 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
     unsigned int id_pt_attuale = Pmesh.V - n_nuovi_punti; 
 // E poi:
     unsigned int id_attuale_triangoli = 0;
+    unsigned int id_attuale_spigoli = Pmesh.Dim1D;
 
     Pmesh.M2D = MatrixXd::Zero(6,Pmesh.F);
 
@@ -530,7 +541,16 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
             Pmesh.M2D(0,id_attuale_triangoli)=base[0];//AB dovrà essere sovrascritto dalla nuova base
             Pmesh.M2D(1,id_attuale_triangoli)=base[1];
             Pmesh.M2D(2,id_attuale_triangoli)=CA[i+1];
+            
+
+            Pmesh.M1D_triangolini(0,id_attuale_spigoli)=base[1];
+            Pmesh.M1D_triangolini(1,id_attuale_spigoli)=CA[i+1];
+
+            Pmesh.M2D(2,id_attuale_triangoli)=id_attuale_spigoli; //inserisce l'id spigolo (è) il secondo
+
             id_attuale_triangoli++;
+            id_attuale_spigoli++;
+
             unsigned int dim = base.size();
             tetto.resize(dim-1);
             tetto[0]=CA[i+1];
@@ -554,7 +574,7 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
                 Pmesh.M2D(0,id_attuale_triangoli)=base[j];//AB dovrà essere sovrascritto dalla nuova base
                 Pmesh.M2D(1,id_attuale_triangoli)=base[j+1];
                 Pmesh.M2D(2,id_attuale_triangoli)=tetto[j];
-                id_attuale_triangoli++;
+                id_attuale_triangoli++;>
             }
             base.conservativeResize(dim-1);
             base = tetto;

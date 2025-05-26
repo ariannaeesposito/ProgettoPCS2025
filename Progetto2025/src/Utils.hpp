@@ -18,13 +18,17 @@ namespace PolygonalLibrary
     bool ImportCell1Ds(PolygonalMesh& mesh);
     bool ImportCell2Ds(PolygonalMesh& mesh);
 
+ 
+    bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh);
+    bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh) ;
+    bool Proiezione_sfera(PolygonalMesh& Pmesh);
+ 
+
+
+
+    // unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord);
     //void triangolazione(PolygonalMesh& mesh);
     // void triangolazione1(PolygonalMesh& mesh);
     // void triangolazione2(PolygonalMesh& mesh);
 
-    bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh);
-    bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh) ;
-    // unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord);
- 
- 
 }

@@ -34,16 +34,15 @@ namespace PolygonalLibrary{
         map <unsigned int, list<unsigned int>> marker1D;
         map <unsigned int, list<unsigned int>> marker2D;
 
-        MatrixXd M0D; //coordinate
-        MatrixXd M1D; //estremi
-        MatrixXd M1D_triangolini; // triangolini
-
-        MatrixXd M2D; // triangolini 
+        MatrixXd M0D; //coordinate 
+        MatrixXi M1D; //spigoli poligono platonico
+        MatrixXi M1D_triangolini; // spigoli triangolini
+        MatrixXi M_pt_spigoli; // matrice che contiene ad ogni riga j-esima i punti generati dalla mesh sullo spigolo j 
+        MatrixXi M1D_spigoli_intermedi;
+        MatrixXi M2D; // coordinate e spigoli triangolini
 
         vector<vector<unsigned int>> M2D_vertici; // essendo un vector di vector oer accedere ai singoli elt devo utilizzare [][] e non ( , )
         vector<vector<unsigned int>> M2D_spigoli; 
-       
-
 } ;
 
 }

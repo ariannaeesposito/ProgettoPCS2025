@@ -36,14 +36,14 @@
 
 		Inizializzazione_vertici(mesh ,Tmesh);
 		Inizializzazione_punti_interni(mesh,Tmesh);
-
+		//Proiezione_sfera(mesh);
 		
 		Gedim::UCDUtilities utilities;
 		utilities.ExportPoints("./Cell0Ds.inp",
 								mesh.M0D);
 		utilities.ExportSegments("./Cell1Ds.inp",
 								  mesh.M0D,
-								  mesh.M1D);
+								  mesh.M1D_triangolini);
 	
 	
 	return 0;

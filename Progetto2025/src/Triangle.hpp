@@ -22,7 +22,7 @@ struct TriangularMesh
     vector< unsigned int > Cell1DsMarker;
 
     MatrixXd Cell0DsCoordinates;
-    MatrixXi Cell1DsExtremes;
+    MatrixXd Cell1DsExtremes;
 
     vector<vector<unsigned int>> Cell2DsVertices;
     vector<vector<unsigned int>> Cell2DsEdges;
@@ -33,8 +33,6 @@ struct TriangularMesh
 
     map<unsigned int,list <unsigned int>> MarkerCell1Ds;  //mappa marker → lista di segmenti (Cell1D)
 
-    MatrixXd M_pt_spigoli; // matrice che contiene i punti degli spigoli della mesh
-	MatrixXd M1D_spigoli_intermedi;
 
 
 

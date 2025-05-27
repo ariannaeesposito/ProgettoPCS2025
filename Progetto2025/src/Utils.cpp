@@ -42,19 +42,19 @@ if (p==3){ //facce triangolari
     switch (q)
     {
     case 3: //tetraedro
-        mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_tetraedro.csv";
-        mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_tetraedro.csv"; 
-        mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_tetraedro.csv";
+        mesh.nomefile0 = "./PolygonalMesh/Cell0Ds_tetraedro.csv";
+        mesh.nomefile1 = "./PolygonalMesh/Cell1Ds_tetraedro.csv"; 
+        mesh.nomefile2 = "./PolygonalMesh/Cell2Ds_tetraedro.csv";
         break;
     case 4: //ottaedro 
-        mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_ottaedro.csv";
-        mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_ottaedro.csv";
-        mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_ottaedro.csv";
+        mesh.nomefile0 = "./PolygonalMesh/Cell0Ds_ottaedro.csv";
+        mesh.nomefile1 = "./PolygonalMesh/Cell1Ds_ottaedro.csv";
+        mesh.nomefile2 = "./PolygonalMesh/Cell2Ds_ottaedro.csv";
         break;
     case 5: //icosaedro
-        mesh.nomefile0 = "../PolygonalMesh/Cell0Ds_icosaedro.csv";
-        mesh.nomefile1 = "../PolygonalMesh/Cell1Ds_icosaedro.csv";
-        mesh.nomefile2 = "../PolygonalMesh/Cell2Ds_icosaedro.csv";
+        mesh.nomefile0 = "./PolygonalMesh/Cell0Ds_icosaedro.csv";
+        mesh.nomefile1 = "./PolygonalMesh/Cell1Ds_icosaedro.csv";
+        mesh.nomefile2 = "./PolygonalMesh/Cell2Ds_icosaedro.csv";
         break;
     default:
         cerr << " p ammissibile ma q no" << endl;
@@ -332,7 +332,11 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     unsigned int n = Pmesh.Dim0D; // numero di punti (serve per assegnare ID nuovi ai punti intermedi)
     unsigned int b = Pmesh.d;// numero di suddivisioni per lato, b+1 = numero di punti per spigolo
     double l = Pmesh.lunghezza_lato_triangolino = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(b); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
-    Pmesh.M_pt_spigoli= MatrixXi::Zero(Pmesh.Dim1D,b+1); //matrice che conterrà l'ID del j-esimo punto sul i-esimo spigolo.   
+    //cambiamo la norma perche costosa 
+    
+    //const auto s =Eigen::VectorXd::LinSpaced(b,0.0,1.0):
+    //matrice che conterrà l'ID del j-esimo punto sul i-esimo spigolo.   
+    Pmesh.M_pt_spigoli= MatrixXi::Zero(Pmesh.Dim1D,b+1); 
    
     for (unsigned int i = 0; i < Pmesh.Dim1D; i++) // lo faccio per ogni spigolo
     {  
@@ -348,10 +352,12 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
             unsigned int id = n+i*(b-1)+j-1; //id punti intermedi  :n è l'offset per partire dopo i vertici iniziali, i * (e - 2) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
             Pmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi nella matrice degli spigoli TOTALI
             Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
-            Vector3d coord = Acoord + versore * double(j) * l; //coordinate punti intermedi
+            Vector3d coord = Acoord + versore * double(j) * l; 
+            // Vector3d coord = Acoord + s(j)* (Bcoord-Acoord); //coordinate punti intermedi
             Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
-    }		
+    }	
+
     unsigned int id_spigoli= 0;
 	Pmesh.M1D_triangolini = MatrixXi::Zero(2,Pmesh.E);
 	Pmesh.M1D_spigoli_intermedi= MatrixXi::Zero(Pmesh.Dim1D, b);
@@ -360,11 +366,16 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     {
         for (unsigned int h=0; h < b; h++)
         {
+            //inizialmente riempiamo M1D_triangolini inserendo per ogni id_spigoli gli id dei suoi vertici
             Pmesh.M1D_triangolini(0,id_spigoli) = Pmesh.M_pt_spigoli(k,h);
             Pmesh.M1D_triangolini(1,id_spigoli) = Pmesh.M_pt_spigoli(k,h+1);
-			Pmesh.M1D_spigoli_intermedi(k,h)=id_spigoli;
+
+            //ID dello spigolino h-esimo dello spigolo originale k-esimo.
+            //Per ogni spigolo originale k, teniamo traccia dei suoi b spigolini
+			Pmesh.M1D_spigoli_intermedi(k,h)=id_spigoli; 
             id_spigoli ++;
-        }	
+        }	 
+
     }	
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
@@ -381,9 +392,10 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
 // E poi:
     unsigned int id_attuale_triangoli = 0;
     unsigned int id_attuale_spigoli = Pmesh.Dim1D*d; // numero di spigoli già creati (dalla triangolazione geodetica) + quelli che creeremo ora
+
     cout << "id_attuale_spigoli: " << id_attuale_spigoli << endl;
 
-    Pmesh.M2D = MatrixXi::Zero(6,Pmesh.F);
+    Pmesh.M2D = MatrixXi::Zero(6,Pmesh.F); // 3 ID vertici, 3 ID spigoli per colonna che descrivono un triangolino ( F numero totale di triangolini )
 
     // ciclo sulle facce
 
@@ -395,22 +407,31 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
         unsigned int C_id = Pmesh.M2D_vertici[faccia_id][2];
 
         // coordinate 3D di quei vertici.
-        Vector3d A = Pmesh.M0D.col(A_id); 
+        Vector3d A = Pmesh.M0D.col(A_id); // considero la colonna della matrice delle coordinate 3*ID_punti
         Vector3d B = Pmesh.M0D.col(B_id); 
         Vector3d C = Pmesh.M0D.col(C_id);
+
+        //creo vettori per spostarsi lungo la triangolazione
+
+        //ottengo vettore che si sposta in orizzontale
         Vector3d versore_orizzontale = (B-A) / (B-A).norm() ;
         Vector3d vettore_orizzontale = versore_orizzontale * l ;
+        //ottengo vettore che si sposta in obliquo
         Vector3d versore_obliquo = (C-A) / (C-A).norm() ;
         Vector3d vettore_obliquo = versore_obliquo * l ;
-       
-        unsigned int AB_id = Pmesh.M2D_spigoli[faccia_id][0]; //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli.
+
+       // //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli. in questo modo trovo l'ID di ogni spigolo per faccia
+        unsigned int AB_id = Pmesh.M2D_spigoli[faccia_id][0];
         unsigned int BC_id = Pmesh.M2D_spigoli[faccia_id][1];
         unsigned int CA_id = Pmesh.M2D_spigoli[faccia_id][2];
 
+
+        //inserisco nel vettore tutti i punti sullo spigolo 
         VectorXi AB = Pmesh.M_pt_spigoli.row(AB_id);
         VectorXi BC = Pmesh.M_pt_spigoli.row(BC_id);
         VectorXi CA = Pmesh.M_pt_spigoli.row(CA_id);
 		
+        //inserisco nel vettore tutti gli id degli spigolini ( tra i punti nel vettore sopra ) dello spigolo 
 		VectorXi AB_spigoli = Pmesh.M1D_spigoli_intermedi.row(AB_id);
 		VectorXi BC_spigoli = Pmesh.M1D_spigoli_intermedi.row(BC_id);
 		VectorXi CA_spigoli = Pmesh.M1D_spigoli_intermedi.row(CA_id);
@@ -422,44 +443,39 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
         cout << endl;
 
         // orientiamo i vertici 
-        if (AB[0]==B_id){
-            AB = AB.reverse();
-			AB_spigoli = AB_spigoli.reverse();
+
+        // vuoi che AB[0] sia A, altrimenti inverti
+        if (AB[0] != A_id) {
+            VectorXi AB_reversed = AB.reverse().eval();
+            AB = AB_reversed;
+			VectorXi AB_spigoli_reversed = AB_spigoli.reverse().eval();
+            AB_spigoli= AB_spigoli_reversed;
         }
-        if (BC[0]==C_id){
-            BC = BC.reverse();
-			BC_spigoli = BC_spigoli.reverse();
+
+        // vuoi che BC[0] sia B, altrimenti inverti
+        if (BC[0] != B_id) {
+            VectorXi BC_reversed = BC.reverse().eval();
+            BC = BC_reversed;
+			VectorXi BC_spigoli_reversed = BC_spigoli.reverse().eval();
+            BC_spigoli= BC_spigoli_reversed;
         }
-        unsigned int ferb = 0;
-        if (CA[0]==C_id){
+
+        // vuoi che CA[0] sia C (per costruire da C ad A)
+       if (CA[0]==C_id){
             cout << "flagder: " << CA[0] << endl;
             VectorXi CA_reversed = CA.reverse().eval();
             CA = CA_reversed;
-			CA_spigoli = CA_spigoli.reverse();
-            ferb = C_id;
+			VectorXi CA_spigoli_reversed = CA_spigoli.reverse().eval();
+            CA_spigoli= CA_spigoli_reversed;
         }
-        for (unsigned int t=0; t < d+1; t++)
-        {
-            cout << CA[t] << " ";
-        }
-        cout << endl;
-        if (CA[0]==AB[0]){
-            cout << "prima prova" << endl;
-        }
-        if (AB[AB.size()-1]==BC[0]){
-            cout << "seconda prova" << endl;
-        }
-        if (CA[CA.size()-1]==BC[BC.size()-1]){
-            cout << "terza prova" << endl;
-        }
-        else{
-        
-            cout << "flagder: " << CA[0] << CA[CA.size()-1] << endl;
-            cout << "flag: " << ferb << endl;
-            cout << "C: "<< C_id << endl;
-            cout << "CA: "<<CA[CA.size()-1] << endl;
-            cout << "BC: "<<BC[BC.size()-1] << endl;
-        }
+
+        cout << "AB: " << AB[0] << " → " << AB[AB.size()-1] << " (expected A=" << A_id << ", B=" << B_id << ")" << endl;
+        cout << "BC: " << BC[0] << " → " << BC[BC.size()-1] << " (expected B=" << B_id << ", C=" << C_id << ")" << endl;
+        cout << "CA: " << CA[0] << " → " << CA[CA.size()-1] << " (expected C=" << C_id << ", A=" << A_id << ")" << endl;
+
+
+        //Controlla che Pmesh.M2D_spigoli[faccia_id] abbia ID coerenti per ogni faccia 
+        cout << "Faccia " << faccia_id << ": spigoli " << AB_id << ", " << BC_id << ", " << CA_id << endl;
        
         VectorXi base = AB; // vettore di tutti i punti tra A e B
 		VectorXi base_spigoli = AB_spigoli;
@@ -565,7 +581,7 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
 }
 // stampa cella M0D
 
-for (unsigned int i = 0; i < Pmesh.M_pt_spigoli.rows(); i++)
+/*for (unsigned int i = 0; i < Pmesh.M_pt_spigoli.rows(); i++)
 {
     for (unsigned int g=0; g < Pmesh.M_pt_spigoli.cols(); g++)
     {
@@ -588,119 +604,25 @@ cout << "M1D: " << endl;
 for (unsigned int i = 0; i < Pmesh.M1D_triangolini.cols(); i++)
 {
     cout << Pmesh.M1D_triangolini(0,i) << " " << Pmesh.M1D_triangolini(1,i) << endl;
-}
+}*/
 
 return true;
-
 }
 
-
-
-// bool Proiezione_sfera(PolygonalMesh& Pmesh)
-// {
-//     // Proiezione sferica dei punti
-//     for (unsigned int i = 0; i < Pmesh.M0D.cols(); i++)
-//     {
-//         Vector3d coord = Pmesh.M0D.col(i);
-//         double r = coord.norm();
-//         Pmesh.M0D.col(i) = coord / r; // Normalizza le coordinate
-//     }
-//     return true;
-// }
-}
-
-
-
-
-
-//struct per comparare ( nella mappa srve qualcosa che abbia implementato in se loperatore di disuguaglianza)
-
-/*struct Vector3dComparator {
-    bool operator()(const Vector3d& a, const Vector3d& b) const {
-        for (int i = 0; i < 3; ++i) {
-            if (a[i] < b[i]) return true;
-            if (a[i] > b[i]) return false;
-        }
-        return false;
+bool Proiezione_sfera(PolygonalMesh& Pmesh)
+{
+    //Proiezione sferica dei punti
+     for (unsigned int i = 0; i < Pmesh.M0D.cols(); i++)
+     {
+        Vector3d coord = Pmesh.M0D.col(i);
+        double r = coord.norm();
+        Pmesh.M0D.col(i) = coord / r; // Normalizza le coordinate
     }
-};*/
-// unsigned int accedimappa(PoligonalLibrary::TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d& coord){
-// 	double tol = pow(10,-15); //definiamo tolleranza
-//     //controlliamo se gia presente il puntio 
-// 	for (const auto& coppia : mesh.coordinate_punti){ //iteriamo sulla mappa
-// 		double diff = (coppia.first - coord).norm();
-//     //calcoliamo la differnaza tra i due set di coordinate
-// 		if (diff < tol){ //se sono vicine allora le consideriamo le stesse
-// 			return coppia.second;  //restituiamo l'id associato a quelle coordinate ( gia presente )
-// 		}
-// 	}
-// 	//se non c'è nella mappa lo creiamo nuovo 
-// 	unsigned int dim = Pmesh.Dim0D; 
-//     mesh.coordinate_punti[coord] = dim;       // assegna nuovo ID al punto. Inserisce coord come nuova chiave nella mappa coordinate_punti, con valore dim (cioè l’ID).
-//     Pmesh.Dim0D += 1;
-//     Pmesh.M0D(0, dim) = coord(0);    //Salva le coordinate del nuovo punto nella matrice M0D
-//     Pmesh.M0D(1, dim) = coord(1);
-//     Pmesh.M0D(2, dim) = coord(2);
-//     return dim;    
-  /*unsigned int dim = Pmesh.Dim0D; //dim corrente
-
-	mesh.coordinate_punti[coord] = dim+1; //cell0ds già piena stiamo, stiamo aggiungendo alla mappa una chiave e l'id relativo
-	Pmesh.Dim0D += 1;  //aumentiamo il conteggio dei punti già creati
-	Pmesh.M0D(0, dim+1)=coord(0);  //mettiamo il nuovo punto dentro la polygonal mesh
-	Pmesh.M0D(1, dim+1)=coord(1);
-	Pmesh.M0D(2, dim+1)=coord(2);
-	return dim+1;*/
-
-
-
-
-/*bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
-
-    unsigned int d = Pmesh.d;
-    unsigned int n_attuale = Pmesh.M0D.cols(); // n. punti attuali ( colonne della matrice delle coordinate)
-    unsigned int id_punto = n_attuale;
-
-    vector<Vector3d> nuovi_punti;
-
-    //ciclo sulle facce
-
-    for (const auto& faccia : Pmesh.M2D_vertici)
-    {   
-        // ID dei 3 vertici della faccia triangolare.
-        unsigned int A_id = faccia[0];
-        unsigned int B_id = faccia[1];
-        unsigned int C_id = faccia[2];
-
-        //coordinate 3D di quei vertici.
-        Vector3d A = Pmesh.M0D.col(A_id);
-        Vector3d B = Pmesh.M0D.col(B_id);
-        Vector3d C = Pmesh.M0D.col(C_id);
-
-        for (unsigned int i = 1; i < d; ++i)
-        {
-            for (unsigned int j = 1; j < d - i; ++j) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
-            {
-                unsigned int k = d - i - j;
-
-                // parametri della combinazione convessa , sommano a 1 ; coordinate baricentriche
-                double a = double(i) / d; 
-                double b = double(j) / d;
-                double c = double(k) / d;
-
-                Vector3d P = a * A + b * B + c * C;
-                nuovi_punti.push_back(P);
-            }
-        }
-    }
-
-    // Aggiungiamo questi punti a M0D
-    unsigned int n_nuovi = nuovi_punti.size();
-    Pmesh.M0D.conservativeResize(3, id_punto + n_nuovi);
-    for (unsigned int i = 0; i < n_nuovi; ++i)
-    {
-        Pmesh.M0D.col(id_punto + i) = nuovi_punti[i];
-    }
-
-    cout << "Aggiunti " << n_nuovi << " punti interni" << endl;
     return true;
-}*/
+}
+
+bool Duale(PolygonalMesh& Pmesh){
+
+}
+
+}

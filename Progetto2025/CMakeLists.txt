@@ -70,7 +70,7 @@ list(APPEND ${PROJECT_NAME}_TEST_includes ${${PROJECT_NAME}_includes} ${src_test
 
 # COPY : permette di copiare file da cartelle di origine a destinazioni di build senza cambiare la struttura del progetto.
 
-file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/ListPolygons DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
+file(COPY ${CMAKE_CURRENT_SOURCE_DIR}/PolygonalMesh DESTINATION ${CMAKE_CURRENT_BINARY_DIR})
 
 ############################## Add executable ##################################################
 

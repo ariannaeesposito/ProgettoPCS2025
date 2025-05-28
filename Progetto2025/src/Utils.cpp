@@ -327,7 +327,7 @@ bool ImportCell2Ds(PolygonalMesh& mesh)
     return true;
     }
 
-bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
+bool Inizializzazione_vertici( PolygonalMesh& Pmesh )
 {   
     unsigned int n = Pmesh.Dim0D; // numero di punti (serve per assegnare ID nuovi ai punti intermedi)
     unsigned int b = Pmesh.d;// numero di suddivisioni per lato, b+1 = numero di punti per spigolo
@@ -387,8 +387,7 @@ Vector3d baricentro(const Vector3d& p0, const Vector3d& p1, const Vector3d& p2){
 	return bar;
 }
 
-
-bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
+bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
     unsigned int d = Pmesh.d;
     unsigned int num_facce = Pmesh.Dim2D;
     unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
@@ -628,6 +627,71 @@ bool Proiezione_sfera(PolygonalMesh& Pmesh)
         double r = coord.norm();
         Pmesh.M0D.col(i) = coord / r; // Normalizza le coordinate
     }
+    return true;
+}
+
+bool stampa_geodetico(PolygonalMesh& Pmesh)
+{
+    ofstream file_C0D("Cell0Ds.txt"); 
+    if (!file_C0D.is_open())
+    {
+        cerr << "Error opening file Cell0Ds.txt" << endl;
+        return false;
+    }
+    file_C0D << "ID;X;Y;Z" << endl;
+    for (unsigned int i = 0; i < Pmesh.M0D.cols(); i++)
+    {
+        file_C0D << i << ";" << Pmesh.M0D(0,i) << ";" << Pmesh.M0D(1,i) << ";" << Pmesh.M0D(2,i) << endl;
+    }
+    file_C0D.close();
+
+    ofstream file_C1D("Cell1Ds.txt");
+    if (!file_C1D.is_open())
+    {
+        cerr << "Error opening file Cell1Ds.txt" << endl;
+        return false;
+    }
+    file_C1D << "ID;Vertice1;Vertice2" << endl;
+    for (unsigned int i = 0; i < Pmesh.M1D_triangolini.cols(); i++)
+    {
+        file_C1D << i << ";" << Pmesh.M1D_triangolini(0,i) << ";" << Pmesh.M1D_triangolini(1,i) << endl;
+    }
+    file_C1D.close();
+
+    ofstream file_C2D("Cell2Ds.txt");
+    if (!file_C2D.is_open())
+    {
+        cerr << "Error opening file Cell2Ds.txt" << endl;
+        return false;
+    }
+    file_C2D << "ID;Punti;Spigoli" << endl;
+    for (unsigned int i = 0; i < Pmesh.M2D.cols(); i++)
+    {
+        file_C2D << i << ";";
+        for (unsigned int j = 0; j < 3; j++)
+        {
+            file_C2D << Pmesh.M2D(j,i) << ";";
+        }
+        for (unsigned int j = 3; j < 6; j++)
+        {
+            file_C2D << Pmesh.M2D(j,i) << ";";
+        }
+        file_C2D.seekp(-1, std::ios::end); // vai all'ultimo carattere
+        file_C2D.put(' '); // lo sovrascrivi (es. con uno spazio)
+        file_C2D << endl; // vai a capo
+    }
+    file_C2D.close();
+
+    ofstream file_C3D("Cell3Ds.txt");
+    if (!file_C3D.is_open())
+    {
+        cerr << "Error opening file Cell3Ds.txt" << endl;
+        return false;
+    }
+    file_C3D << "ID;N^vertici;N^Spigoli;N^Facce" << endl;
+    file_C3D << "0;" << Pmesh.V << ";" << Pmesh.E << ";" << Pmesh.F << endl;
+    file_C3D.close();
+
     return true;
 }
 

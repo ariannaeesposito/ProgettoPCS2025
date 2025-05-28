@@ -19,10 +19,11 @@ namespace PolygonalLibrary
     bool ImportCell2Ds(PolygonalMesh& mesh);
 
  
-    bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh);
-    bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh) ;
+    bool Inizializzazione_vertici( PolygonalMesh& Pmesh);
+    bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh);
     bool Proiezione_sfera(PolygonalMesh& Pmesh);
 	bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh);
+    bool stampa_geodetico(PolygonalMesh& Pmesh);
 
 
 

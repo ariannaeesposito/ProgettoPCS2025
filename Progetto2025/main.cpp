@@ -10,10 +10,7 @@
 	int main(int argc ,char* argv[])
 	{
 		PolygonalMesh mesh;
-		TriangularMesh Tmesh;
-
-
-
+		
 		if(!input_solido_platonico(mesh, argc, argv))
 		{
 			cerr << "Error Input non imported successfully" << endl;
@@ -34,9 +31,10 @@
 			cout << "File imported successfully" << endl;
 		}
 
-		Inizializzazione_vertici(mesh ,Tmesh);
-		Inizializzazione_punti_interni(mesh,Tmesh);
-		//Proiezione_sfera(mesh);
+		Inizializzazione_vertici(mesh);
+		Inizializzazione_punti_interni(mesh);
+		Proiezione_sfera(mesh);
+		stampa_geodetico(mesh);
 		
 		Gedim::UCDUtilities utilities;
 		utilities.ExportPoints("./Cell0Ds.inp",

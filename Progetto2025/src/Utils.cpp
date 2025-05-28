@@ -382,9 +382,12 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
     //M_pt_spigoli ti dirà quali punti sono su ciascuno spigolo (per triangolare le facce)
 }
 
+Vector3d baricentro(const Vector3d& p0, const Vector3d& p1, const Vector3d& p2){
+	return 1/3*(p0+p1+p2);
+}
+
 
 bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh){ //Iteriamo su tutte le facce Pmesh.M2D_vertici
-    double l = Pmesh.lunghezza_lato_triangolino;
     unsigned int d = Pmesh.d;
     unsigned int num_facce = Pmesh.Dim2D;
     unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
@@ -529,6 +532,7 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
                 Pmesh.M2D(0,id_attuale_triangoli)=tetto[j-1];//AB dovrà essere sovrascritto dalla nuova base
                 Pmesh.M2D(1,id_attuale_triangoli)=base[j];
                 Pmesh.M2D(2,id_attuale_triangoli)=tetto[j];
+				
 				Pmesh.M2D(3,id_attuale_triangoli)=id_attuale_spigoli-1;
 
 
@@ -626,8 +630,104 @@ bool Proiezione_sfera(PolygonalMesh& Pmesh)
     return true;
 }
 
-bool Duale(PolygonalMesh& Pmesh){
+bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh){
+	Dmesh.M0D = MatrixXd::Zero(3,Pmesh.F);
+	Dmesh.Dim0D = Pmesh.F;
+	Dmesh.M1D_triangolini = -1* MatrixXi::Ones(2,Pmesh.E); //righe: flag, primo bar, secondo bar colonna id spigolo
+	Dmesh.Dim1D = Pmesh.E;
+	Dmesh.M2D = -1*MatrixXi::Ones(12,Pmesh.V);
+	Dmesh.Dim2D = Pmesh.V;
+	
+	//MatrixXi spigoli_baricentri = -1* MatrixXd::ones(2,Pmesh.E); //righe: flag, primo bar, secondo bar colonna id spigolo
+	
+	for (unsigned int i=0; i < Pmesh.F; i++){
+		Dmesh.M0D.col(i) = baricentro(Pmesh.M0D.col(Pmesh.M2D(0,i)), Pmesh.M0D.col(Pmesh.M2D(1,i)), Pmesh.M0D.col(Pmesh.M2D(2,i)));
+		for (unsigned int j=3; j<6; j++){
+			if (Dmesh.M1D_triangolini(0,Pmesh.M2D(j,i))== -1){
+				Dmesh.M1D_triangolini(0,Pmesh.M2D(j,i)) = i;
+			}
+			else{
+				Dmesh.M1D_triangolini(1,Pmesh.M2D(j,i));
+			}
+		}
+	}
+	
+	MatrixXi id_spigoli = -1*MatrixXi::Ones(6,Pmesh.F);
+	
+	unsigned int id_vertice;
+	unsigned int id_spigolo_precedente;
+	unsigned int id_spigolo_successivo;
+	unsigned int id_vertice_iniziale;
+	
+	for (unsigned int k =0; k < Pmesh.E; k++){
 
+		unsigned int A_id = Pmesh.M1D_triangolini(0,k);// k che è l'id dello spigolo (e cpincide con la i di prima)  richiama gli id dei due vertici delo spigolo
+		unsigned int B_id = Pmesh.M1D_triangolini(1,k);
+		
+		for (unsigned int j=0; j<6; j++){
+			if (id_spigoli(j,A_id)== -1){
+				id_spigoli(j,A_id)=k;
+				break;
+			}
+		}
+		for (unsigned int j=0; j<6; j++){
+			if (id_spigoli(j,B_id)== -1){
+				id_spigoli(j,B_id)=k;
+				break;
+			}
+		}
+	}
+	
+	for (unsigned int h = 0; h < Pmesh.V; h++){
+		id_spigolo_precedente = id_spigoli(0,h);
+		Dmesh.M2D(6,h) = id_spigolo_precedente;
+		
+		id_vertice_iniziale = Dmesh.M1D_triangolini(0,id_spigolo_precedente);
+		Dmesh.M2D(0,h) = id_vertice_iniziale;
+		
+		//id_vertice = Dmesh.M1D_triangolini(1,id_spigolo_precedente);
+		//Dmesh.M2D(1,h) = id_vertice;
+		
+		unsigned int contatore = 0;//vertice
+		unsigned int contatore_spigoli = 6;
+		
+		while (id_vertice == id_vertice_iniziale){
+			for(unsigned int j=1;j<6;j++){
+				id_spigolo_successivo = id_spigoli(j,h);
+				
+				if (id_spigolo_successivo != id_spigolo_precedente){
+					
+					unsigned int A_id = Dmesh.M1D_triangolini(0,id_spigolo_successivo);
+					unsigned int B_id = Dmesh.M1D_triangolini(1,id_spigolo_successivo);
+					
+					if (A_id == id_vertice){
+						Dmesh.M2D(contatore+1, h) = A_id;
+						Dmesh.M2D(contatore_spigoli+1,h) = id_spigolo_successivo;
+						
+						id_vertice = B_id;
+						id_spigolo_precedente = id_spigolo_successivo;
+						contatore++;
+						contatore_spigoli++;
+						break;
+					}
+					
+					if (B_id == id_vertice){
+						Dmesh.M2D(contatore+1, h) = B_id;
+						Dmesh.M2D(contatore_spigoli+1,h) = id_spigolo_successivo;
+						
+						id_vertice = A_id;
+						id_spigolo_precedente = id_spigolo_successivo;
+						contatore++;
+						contatore_spigoli++;
+						break;
+					}
+				}
+			}
+		}
+		
+	}
+	return true;
 }
 
 }
+

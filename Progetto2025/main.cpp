@@ -45,7 +45,16 @@
 								  mesh.M0D,
 								  mesh.M1D_triangolini);
 	
-	
+		PolygonalMesh Dmesh;
+		Duale(mesh, Dmesh);
+
+		//Proiezione_sfera(mesh);
+
+		utilities.ExportPoints("./Cell0DsD.inp",
+								Dmesh.M0D);
+		utilities.ExportSegments("./Cell1DsD.inp",
+								  mesh.M0D,
+								  Dmesh.M1D_triangolini);
 	return 0;
 
 	

@@ -22,7 +22,7 @@ namespace PolygonalLibrary
     bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh);
     bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh) ;
     bool Proiezione_sfera(PolygonalMesh& Pmesh);
- 
+	bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh);
 
 
 

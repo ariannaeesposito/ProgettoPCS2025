@@ -331,10 +331,10 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
 {   
     unsigned int n = Pmesh.Dim0D; // numero di punti (serve per assegnare ID nuovi ai punti intermedi)
     unsigned int b = Pmesh.d;// numero di suddivisioni per lato, b+1 = numero di punti per spigolo
-    double l = Pmesh.lunghezza_lato_triangolino = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(b); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
+    //double l = Pmesh.lunghezza_lato_triangolino = (Pmesh.M0D.col(Pmesh.M1D(0,0))-Pmesh.M0D.col(Pmesh.M1D(1,0))).norm()/(b); // lunghezza per distanziare ogni punto nello spigolo, prendendo coord dei primi due punti dello spigolo zero, facendone la norma per trovare lunghezza A-B e la dividiamo per il numero di segmenti 
     //cambiamo la norma perche costosa 
     
-    //const auto s =Eigen::VectorXd::LinSpaced(b,0.0,1.0):
+    const auto s = VectorXd::LinSpaced(b+1,0.0,1.0);
     //matrice che conterrà l'ID del j-esimo punto sul i-esimo spigolo.   
     Pmesh.M_pt_spigoli= MatrixXi::Zero(Pmesh.Dim1D,b+1); 
    
@@ -351,9 +351,9 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
         {               
             unsigned int id = n+i*(b-1)+j-1; //id punti intermedi  :n è l'offset per partire dopo i vertici iniziali, i * (e - 2) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
             Pmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi nella matrice degli spigoli TOTALI
-            Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
-            Vector3d coord = Acoord + versore * double(j) * l; 
-            // Vector3d coord = Acoord + s(j)* (Bcoord-Acoord); //coordinate punti intermedi
+            //Vector3d versore = (Bcoord - Acoord).normalized(); //direzione spigolo
+            //Vector3d coord = Acoord + versore * double(j) * l; 
+            Vector3d coord = Acoord + s(j)* (Bcoord-Acoord); //coordinate punti intermedi
             Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
     }	
@@ -412,14 +412,15 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
         Vector3d C = Pmesh.M0D.col(C_id);
 
         //creo vettori per spostarsi lungo la triangolazione
-
+		/*
         //ottengo vettore che si sposta in orizzontale
         Vector3d versore_orizzontale = (B-A) / (B-A).norm() ;
         Vector3d vettore_orizzontale = versore_orizzontale * l ;
         //ottengo vettore che si sposta in obliquo
         Vector3d versore_obliquo = (C-A) / (C-A).norm() ;
         Vector3d vettore_obliquo = versore_obliquo * l ;
-
+		*/
+		
        // //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli. in questo modo trovo l'ID di ogni spigolo per faccia
         unsigned int AB_id = Pmesh.M2D_spigoli[faccia_id][0];
         unsigned int BC_id = Pmesh.M2D_spigoli[faccia_id][1];
@@ -506,16 +507,20 @@ bool Inizializzazione_punti_interni(PolygonalMesh& Pmesh, TriangularMesh& Tmesh)
             unsigned int dim = base.size();
             tetto.resize(dim-1);
             tetto[0]=CA[i+1];
+			tetto[dim-2]=BC[i+1];
             tetto_spigoli.resize(dim-2);
+			const auto s = VectorXd::LinSpaced(d-i,0.0,1.0);
 
             for (unsigned int j = 1; j < d - i; j ++) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
             {   
+				
                 if (j == d-i-1){
-                    tetto[j]=BC[i+1];
+                    //tetto[j]=BC[i+1];
 					flag_spigoli = 1;
                 }
                 else{
-                    Vector3d pt = A+(i+1)*vettore_obliquo +j*vettore_orizzontale;
+                    //Vector3d pt = A+(i+1)*vettore_obliquo +j*vettore_orizzontale;
+					Vector3d pt = Pmesh.M0D.col(tetto[0])+s(j)*(Pmesh.M0D.col(tetto[dim-2])-Pmesh.M0D.col(tetto[0]));
                     Pmesh.M0D.col(id_pt_attuale) = pt;
                     tetto[j]=id_pt_attuale;
                     id_pt_attuale++;

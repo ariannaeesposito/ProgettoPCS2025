@@ -383,7 +383,8 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , TriangularMesh& Tmesh)
 }
 
 Vector3d baricentro(const Vector3d& p0, const Vector3d& p1, const Vector3d& p2){
-	return 1/3*(p0+p1+p2);
+	Vector3d bar = (p0+p1+p2)/3.0;
+	return bar;
 }
 
 
@@ -639,19 +640,43 @@ bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh){
 	Dmesh.Dim2D = Pmesh.V;
 	
 	//MatrixXi spigoli_baricentri = -1* MatrixXd::ones(2,Pmesh.E); //righe: flag, primo bar, secondo bar colonna id spigolo
-	
+	unsigned int counter_if = 0;
+		unsigned int counter_else = 0;
 	for (unsigned int i=0; i < Pmesh.F; i++){
 		Dmesh.M0D.col(i) = baricentro(Pmesh.M0D.col(Pmesh.M2D(0,i)), Pmesh.M0D.col(Pmesh.M2D(1,i)), Pmesh.M0D.col(Pmesh.M2D(2,i)));
+		//cout << baricentro(Pmesh.M0D.col(Pmesh.M2D(0,i)), Pmesh.M0D.col(Pmesh.M2D(1,i)), Pmesh.M0D.col(Pmesh.M2D(2,i))) << endl;
+		
+		
 		for (unsigned int j=3; j<6; j++){
-			if (Dmesh.M1D_triangolini(0,Pmesh.M2D(j,i))== -1){
+			if (Dmesh.M1D_triangolini(0,Pmesh.M2D(j,i))== -1)
+			{
 				Dmesh.M1D_triangolini(0,Pmesh.M2D(j,i)) = i;
+				counter_if++;
 			}
 			else{
-				Dmesh.M1D_triangolini(1,Pmesh.M2D(j,i));
+				if (Dmesh.M1D_triangolini(1,Pmesh.M2D(j,i)) != -1){
+					cout << "scemo di guerra sovrascrive 1" << endl;
+				}
+				Dmesh.M1D_triangolini(1,Pmesh.M2D(j,i)) = i;
+				cout << Dmesh.M1D_triangolini(1,Pmesh.M2D(j,i)) << endl;
+				counter_else++;
 			}
 		}
 	}
+	cout << "cif " << counter_if << endl;
+	cout << "celse " << counter_else << endl;
+	cout << "M1D" << endl;
+	for (unsigned int i = 0; i < Pmesh.M1D_triangolini.cols(); i++)
+	{
+    cout << Dmesh.M1D_triangolini(0,i) << " " << Dmesh.M1D_triangolini(1,i) << endl;
+	}
 	
+	/*cout << "M0D: " << endl;
+	for (unsigned int i = 0; i < Pmesh.M0D.cols(); i++)
+	{
+    cout << Dmesh.M0D(0,i) << " " << Dmesh.M0D(1,i) << " " << Dmesh.M0D(2,i) << endl;
+	}
+	*/
 	MatrixXi id_spigoli = -1*MatrixXi::Ones(6,Pmesh.F);
 	
 	unsigned int id_vertice;

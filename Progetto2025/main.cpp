@@ -33,7 +33,7 @@
 
 		Inizializzazione_vertici(mesh);
 		Inizializzazione_punti_interni(mesh);
-		Proiezione_sfera(mesh);
+		// Proiezione_sfera(mesh);
 		stampa_geodetico(mesh);
 		
 		Gedim::UCDUtilities utilities;
@@ -45,13 +45,12 @@
 	
 		PolygonalMesh Dmesh;
 		Duale(mesh, Dmesh);
-
-		//Proiezione_sfera(mesh);
+		Proiezione_sfera(Dmesh);
 
 		utilities.ExportPoints("./Cell0DsD.inp",
 								Dmesh.M0D);
 		utilities.ExportSegments("./Cell1DsD.inp",
-								  mesh.M0D,
+								  Dmesh.M0D,
 								  Dmesh.M1D_triangolini);
 	return 0;
 

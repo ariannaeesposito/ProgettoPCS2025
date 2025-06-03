@@ -32,9 +32,16 @@
 		}
 
 		Inizializzazione_vertici(mesh);
-		Inizializzazione_punti_interni(mesh);
+
+		if (mesh.classe == 1){
+			Inizializzazione_punti_interni(mesh);
+		}
+		else{
+			Inizializzazione_punti_interni_classe2(mesh);
+		}
+
 		// Proiezione_sfera(mesh);
-		stampa_geodetico(mesh);
+		//stampa_geodetico(mesh);
 		
 		Gedim::UCDUtilities utilities;
 		utilities.ExportPoints("./Cell0Ds.inp",
@@ -42,8 +49,9 @@
 		utilities.ExportSegments("./Cell1Ds.inp",
 								  mesh.M0D,
 								  mesh.M1D_triangolini);
+
 	
-		PolygonalMesh Dmesh;
+		/*PolygonalMesh Dmesh;
 		Duale(mesh, Dmesh);
 		Proiezione_sfera(Dmesh);
 
@@ -51,7 +59,7 @@
 								Dmesh.M0D);
 		utilities.ExportSegments("./Cell1DsD.inp",
 								  Dmesh.M0D,
-								  Dmesh.M1D_triangolini);
+								  Dmesh.M1D_triangolini);*/
 	return 0;
 
 	

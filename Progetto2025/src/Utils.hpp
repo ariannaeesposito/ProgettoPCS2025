@@ -24,6 +24,8 @@ namespace PolygonalLibrary
     bool Proiezione_sfera(PolygonalMesh& Pmesh);
 	bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh);
     bool stampa_geodetico(PolygonalMesh& Pmesh);
+    bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh);
+    bool crea_triangolo(PolygonalMesh& Pmesh, const unsigned int& id_triangolo ,const unsigned int& id_pt_1, const unsigned int& id_pt_2, const unsigned int& id_pt_3, const unsigned int& id_sp_1, const unsigned int& id_sp_2, const unsigned int& id_sp_3);
 
 
 

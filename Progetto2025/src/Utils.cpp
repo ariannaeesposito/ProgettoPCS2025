@@ -214,7 +214,7 @@ bool ImportCell0Ds(PolygonalMesh& mesh)
 
 
     // dobbimao fare la matrice di dimensione 3xnumnero di lunti totale
-    mesh.M0D = Eigen::MatrixXd::Zero(3, mesh.V); 
+    mesh.M0D = MatrixXd::Zero(3, mesh.V); 
 // voglio stampare la lista
 
     for (string& li : lista_dim) // itero una lista
@@ -356,6 +356,7 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh )
 {   
     unsigned int n = Pmesh.Dim0D; // numero di punti (serve per assegnare ID nuovi ai punti intermedi)
     unsigned int b;
+
     if (Pmesh.classe == 1)
         b = Pmesh.d;// numero di suddivisioni per lato, b+1 = numero di punti per spigolo
     else 
@@ -864,10 +865,11 @@ bool crea_triangolo(PolygonalMesh& Pmesh,const unsigned int& id_triangolo ,const
     return true;
 }
 
+
 bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
 	unsigned int d = Pmesh.d;
     unsigned int num_facce = Pmesh.Dim2D;
-    unsigned int n_nuovi_punti = num_facce * pow(d,2);
+    unsigned int n_nuovi_punti = num_facce *  (pow(d,2)+((d-2)*(d-1))/2);
     unsigned int id_pt_attuale = Pmesh.V - n_nuovi_punti;
     unsigned int id_attuale_triangoli = 0;
     unsigned int id_attuale_spigolo = Pmesh.Dim1D*2*d; // numero di spigoli già creati (dalla triangolazione geodetica) + quelli che creeremo ora
@@ -897,12 +899,12 @@ bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
         //inserisco nel vettore tutti i punti sullo spigolo 
         VectorXi AB = Pmesh.M_pt_spigoli.row(AB_id);
         VectorXi BC = Pmesh.M_pt_spigoli.row(BC_id);
-        VectorXi CA = Pmesh.M_pt_spigoli.row(CA_id);
+        VectorXi CA = Pmesh.M_pt_spigoli.row(CA_id).eval();
 		
         //inserisco nel vettore tutti gli id degli spigolini ( tra i punti nel vettore sopra ) dello spigolo 
 		VectorXi AB_spigoli = Pmesh.M1D_spigoli_intermedi.row(AB_id);
 		VectorXi BC_spigoli = Pmesh.M1D_spigoli_intermedi.row(BC_id);
-		VectorXi CA_spigoli = Pmesh.M1D_spigoli_intermedi.row(CA_id);
+		VectorXi CA_spigoli = Pmesh.M1D_spigoli_intermedi.row(CA_id).eval();
 
         for (unsigned int t=0; t < d+1; t++)
         {
@@ -949,24 +951,29 @@ bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
 		VectorXi base_spigoli = AB_spigoli;
         VectorXi tetto;
 		VectorXi tetto_spigoli;
-		VectorXi Baricentri;
 		VectorXd s;
-		VectorXd ausiliario_pt;
+	
 
         unsigned int dim = base.size();
         tetto = VectorXi::Zero(dim);
 
         tetto_spigoli = VectorXi::Zero(dim-1);
+
+        //itero sui livelli del triangolo 
 		for (unsigned int i = 0; i < d; i ++){
             //stampa tetto 
-
+            
+            //linspace sul tetto di i 
 			s = VectorXd::LinSpaced(d-i, 0.0, 1.0);
+
             Vector3d coord_iniziale = Pmesh.M0D.col(CA[(i+1)*2]);
-			Vector3d coord_finale = Pmesh.M0D.col(BC[(i+1)*2]);
+
+            Vector3d coord_finale = Pmesh.M0D.col(BC[(i+1)*2]);
+
 			for (unsigned int l=1; l < d-i-1; l++)
             {// iteriamo sulla lunghezza se = 2 non lo fa
                 Pmesh.M0D.col(id_pt_attuale)= coord_iniziale +s(l)*(coord_finale-coord_iniziale);
-				tetto[2*l] = id_pt_attuale;
+				tetto[2*l] = id_pt_attuale; // tetto continene id dei punti sul tetto di i 
                 id_pt_attuale++;
 			}
 
@@ -974,15 +981,21 @@ bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
             {
                 cout << " k= " << k << endl;
 
-                Pmesh.M0D.col(id_pt_attuale)=baricentro(Pmesh.M0D.col(base[k]), Pmesh.M0D.col(base[k+2]), Pmesh.M0D.col(tetto[k*2]));
+                Pmesh.M0D.col(id_pt_attuale)=baricentro(Pmesh.M0D.col(base[2*k]), Pmesh.M0D.col(base[2*k+2]), Pmesh.M0D.col(tetto[k*2]));
                 id_pt_attuale++;
-                Pmesh.M0D.col(id_pt_attuale)=baricentro(Pmesh.M0D.col(tetto[(k+1)*2]), Pmesh.M0D.col(base[k+2]), Pmesh.M0D.col(tetto[k*2]));
-                tetto[2*k+1]=id_pt_attuale;
-                id_pt_attuale++;
+                
+                
+                Pmesh.M0D.col(id_pt_attuale)=baricentro(Pmesh.M0D.col(tetto[(k+1)*2]), Pmesh.M0D.col(base[2*k+2]), Pmesh.M0D.col(tetto[k*2]));
+               
+                tetto[2*k+1]=id_pt_attuale; //baricentro che serve per il parallelogramma successivo
+
+                
+
+
                 Pmesh.M1D_triangolini.col(id_attuale_spigolo) = Vector2i(tetto[2*k], id_pt_attuale-1);
                 tetto_spigoli[2*k] = id_attuale_spigolo;
                 id_attuale_spigolo++;
-                Pmesh.M1D_triangolini.col(id_attuale_spigolo) = Vector2i(tetto[2*k+2], id_pt_attuale-2);
+                Pmesh.M1D_triangolini.col(id_attuale_spigolo) = Vector2i(tetto[2*k+2], id_pt_attuale-1);
                 tetto_spigoli[2*k+1] = id_attuale_spigolo;
                 id_attuale_spigolo++;
                 Pmesh.M1D_triangolini.col(id_attuale_spigolo) = Vector2i(base[2*k], id_pt_attuale-2);
@@ -1000,7 +1013,7 @@ bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
                 Pmesh.M1D_triangolini.col(id_attuale_spigolo) = Vector2i(base[2*k+2], id_pt_attuale-1);
                 id_attuale_spigolo++;
 
-                crea_triangolo(Pmesh, id_attuale_triangoli, base[2*k], base[2*k+1], id_pt_attuale-2, base_spigoli[2*k], id_attuale_spigolo-6, id_attuale_spigolo-7);
+                /*crea_triangolo(Pmesh, id_attuale_triangoli, base[2*k], base[2*k+1], id_pt_attuale-2, base_spigoli[2*k], id_attuale_spigolo-6, id_attuale_spigolo-7);
                 id_attuale_triangoli++;
                 crea_triangolo(Pmesh, id_attuale_triangoli, base[2*k+1], base[2*k+2], id_pt_attuale-2, base_spigoli[2*k+1], id_attuale_spigolo-5, id_attuale_spigolo-6);
                 id_attuale_triangoli++;
@@ -1011,23 +1024,37 @@ bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
                 crea_triangolo(Pmesh, id_attuale_triangoli, id_pt_attuale-2, id_pt_attuale-1, tetto[2*k], id_attuale_spigolo-2, id_attuale_spigolo-9, id_attuale_spigolo-3);
                 id_attuale_triangoli++;
                 crea_triangolo(Pmesh, id_attuale_triangoli, base[2*k+2], id_pt_attuale-1, id_pt_attuale-2, id_attuale_spigolo-1, id_attuale_spigolo-2, id_attuale_spigolo-5);
-                id_attuale_triangoli++;
+                id_attuale_triangoli++;*/
 
-                CA[i*2+1] = id_pt_attuale-1;
-                CA_spigoli[2*i] = id_attuale_spigolo-1;
-                CA_spigoli[2*i+1] = id_attuale_spigolo-8;
+                CA[i*2+1] = id_pt_attuale;
+                id_pt_attuale++;
+
+                //CA_spigoli[2*i] = id_attuale_spigolo-1;
+               // CA_spigoli[2*i+1] = id_attuale_spigolo-8;
 
             }
             
             cout <<" = "  << endl;
+        
+            // id dei punti di ogni segmentino 
             unsigned int id_base_1 = base[dim-i*2-3];
             cout <<" = "  << endl;
             unsigned int id_base_mezzo = base[dim-i*2-2];
             cout <<" = "  << endl;
             unsigned int id_base_2 = base[dim-i*2-1];
             cout <<" = "  << endl;
-            unsigned int id_tetto = tetto[dim-i*2-4];
-            cout <<" = "  << tetto[dim-i*2-4] << endl;
+            unsigned int id_tetto;
+
+            unsigned int a = dim-i*2-3 ;
+            if ( a > 0 ){
+                id_tetto = tetto[a];
+                cout <<" = "  << tetto[a] << endl;
+            }
+            else {
+                id_tetto = CA[dim-1];
+            }
+           
+            
 
             Pmesh.M0D.col(id_pt_attuale)=baricentro(Pmesh.M0D.col(id_base_1), Pmesh.M0D.col(id_base_2), Pmesh.M0D.col(id_tetto));
                 id_pt_attuale++;

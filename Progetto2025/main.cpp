@@ -43,12 +43,12 @@
 		// Proiezione_sfera(mesh);
 		//stampa_geodetico(mesh);
 		
-		Gedim::UCDUtilities utilities;
+		/*Gedim::UCDUtilities utilities;
 		utilities.ExportPoints("./Cell0Ds.inp",
 								mesh.M0D);
 		utilities.ExportSegments("./Cell1Ds.inp",
 								  mesh.M0D,
-								  mesh.M1D_triangolini);
+								  mesh.M1D_triangolini);*/
 
 	
 		/*PolygonalMesh Dmesh;

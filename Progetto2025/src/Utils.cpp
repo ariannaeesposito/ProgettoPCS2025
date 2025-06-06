@@ -1130,6 +1130,16 @@ bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh){
 return true;
 }
 
+void stampa_lista_adiacenza(const vector<vector<unsigned int>>& LA) {
+    for (size_t i = 0; i < LA.size(); ++i) {
+        cout << "Nodo " << i << ": ";
+        for (unsigned int vicino : LA[i]) {
+            cout << vicino << " ";
+        }
+        cout << endl;
+    }
+}
+
 bool CamminoMinimo(PolygonalMesh& Pmesh){
     
    unsigned int  id_vertice_iniziale = Pmesh.id_vertice_iniziale;
@@ -1142,18 +1152,20 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
 
     //creiamo la LISTA DI ADIACENZA
     vector<vector<unsigned int>> LA;
+
     LA.reserve(Pmesh.V);
+
     MatrixXd W = MatrixXd::Zero(Pmesh.V, Pmesh.V);
     
     //riempo la matrice di adiacenza
 
-   /*for (size_t j = 0 ; j < Pmesh.V ; j ++ ){
+   for (size_t j = 0 ; j < Pmesh.V ; j ++ ){
 
         vector<unsigned int> punti_vicini;
+        punti_vicini.reserve(10);
 
-       //considero ogni spigolo e ne prendo i punti 
+        //considero ogni spigolo e ne prendo i punti 
         for (size_t i = 0 ; i < Pmesh.E ; i ++){
-        cout<<"uff"<< j <<endl;
 
             unsigned int origine = Pmesh.M1D_triangolini(0,i);
             unsigned int fine = Pmesh.M1D_triangolini(1,i);
@@ -1165,51 +1177,37 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
                 punti_vicini.push_back(fine);
 
             else if (fine == j)
-                punti_vicini.push_back(origine);
+                punti_vicini.push_back(origine);   
+
         }
-    
+        
+        
         //per ogni punto inserisco nel vector di vector i suoi vicini 
+        
         LA.push_back(punti_vicini);
-    }*/ 
-    
-
-for (size_t i = 0; i < Pmesh.E; ++i) {
-    unsigned int origine = Pmesh.M1D_triangolini(0, i);
-    unsigned int fine    = Pmesh.M1D_triangolini(1, i);
-
-    if (origine < Pmesh.V && fine < Pmesh.V) {
-        LA[origine].push_back(fine);
-        LA[fine].push_back(origine);  // grafo non orientato
-    } else {
-        cerr << "⚠️ Errore: origine o fine fuori dai limiti per lo spigolo " << i << endl;
     }
-}
+    
+   stampa_lista_adiacenza(LA);
 
-    //itero sui punti
+    //itero sui punti per ottenere matrice di adiacenza 
 
     for ( size_t i=0; i< LA.size(); i++){
        
         //itero sul vettore di punti vicini
-        for (size_t k = 0; k < LA[i].size(); ++k) {
-
-           
-
+        for (size_t k = 0; k < LA[i].size(); k++) {
         unsigned int w = LA[i][k];  // vicino del punto i 
-        if (i < Pmesh.V && w < Pmesh.V) {
         W(i, w) = (Pmesh.M0D.col(w) - Pmesh.M0D.col(i)).norm();
-    } else {
-        cerr << " Indice fuori dai limiti: i = " << i << ", w = " << w << std::endl;
-    }
-    }
+        }
     }
 
-    for (size_t i = 0; i < LA.size(); ++i) {
-    std::cout << "Nodo " << i << " ha vicini: ";
-    for (unsigned int w : LA[i]) {
-        std::cout << w << " ";
+    for ( unsigned int i=0; i< Pmesh.V; i++){
+
+        for ( unsigned int w=0; w< Pmesh.V; w++){
+            cout<<W(i,w)<< "  " ;}
+
+    cout<<endl;
     }
-    std::cout << std::endl;
-}
+
 
     
     //ALGORITMO DI DIJKSTRA per visitare il grafo
@@ -1231,7 +1229,7 @@ for (size_t i = 0; i < Pmesh.E; ++i) {
     priority_queue< ND, vector<ND>, greater<ND>> PQ;
 		
     pred[id_vertice_iniziale] = id_vertice_iniziale;
-    dist[id_vertice_iniziale] = 0;
+    dist[id_vertice_iniziale] = 0.0;
 
     for(int i = 0; i < LA.size(); i++){
         PQ.push({dist[i], i}); 
@@ -1239,14 +1237,14 @@ for (size_t i = 0; i < Pmesh.E; ++i) {
 			
     while(!PQ.empty()){
 
-        int p = PQ.top().first; // punto
-        int u= PQ.top().second; // distanza
+        int p = PQ.top().first; // distanza
+        int u = PQ.top().second; // punto
 
         PQ.pop(); //rimuove ( non restituisce nulla ) l’elemento con priorità più alta 
 
         // Se la distanza più aggiornata per u (dist[u]) è già più piccola di quella che sto estraendo (p) ,  non la uso.
-        if (dist[u]<p)
-            continue;
+       // if (dist[u]<p)//
+      //      continue;//
         
         for(const auto& w : LA[u]){ //foreach
             if( dist[w] > dist[u] + W(u,w) ) {
@@ -1254,23 +1252,29 @@ for (size_t i = 0; i < Pmesh.E; ++i) {
                 dist[w] = dist[u] + W(u,w); 
                 pred[w] = u;
 
-                PQ.push({w, dist[w]});
+                PQ.push({dist[w],w});
             }
         }
 	}
 
     // path contiene id dei vertici del cammino minimo 
     vector<unsigned int> path;
+
     path.reserve(Pmesh.V);
 
     int v = id_vertice_finale;
+    
+    //esegiuiamo il cammino al contrario cercando sempre il predecessore
 
     while(v != id_vertice_iniziale) {
         path.push_back(v);
         v = pred[v];
 	} 
-	
+    
     path.push_back(id_vertice_iniziale);
+
+	
+    
 		
     // coloriamo i punti relativi al percorso
     vector<double> ProprietaPunti_path(Pmesh.V, 0.0);
@@ -1304,34 +1308,33 @@ for (size_t i = 0; i < Pmesh.E; ++i) {
     vector<unsigned int> segmenti_Percorso;
     //segmenti_Percorso.reserve(path.size()-1);
 
-    vector<double> ProprietaLatiPercorso(Pmesh.V, 0.0 );
+    vector<double> ProprietaLatiPercorso(Pmesh.E, 0.0 );
 
     cout << path.size() << endl;
 
     double lunghezzaPercorso = 0.0;
 
     //itero su ogni coppia di punti adiacenti del percorso 
-    for (unsigned int i = 0; i < path.size() - 1; ++i) {
+    for (unsigned int i = 0; i < path.size() - 1; i++) {
 
         unsigned int pt_a = path[i];
         unsigned int pt_b = path[i + 1];
 
-        lunghezzaPercorso += (Pmesh.M0D.col(pt_a) - Pmesh.M0D.col(pt_b)).norm();
+        lunghezzaPercorso += W(pt_a , pt_b);
 
         // cerco lo spigolo che collega pt_a e pt_b
         //itero su ogni id_spigolo
 
-        for (unsigned int j = 0; j<  Pmesh.M1D_triangolini.cols(); j ++ )
+        for (unsigned int j = 0; j<  Pmesh.E; j ++ )
         {
             //id dei punti estremi del segmento
             unsigned int id_A = Pmesh.M1D_triangolini(0, j);
             unsigned int id_B = Pmesh.M1D_triangolini(1, j);
 
-            if ((id_A == pt_a && id_B== pt_b) || (id_B == pt_a && id_A == pt_b)) {
+            if ((id_A==pt_a && id_B==pt_b)||(id_A==pt_b && id_B==pt_a)) {
 
                 segmenti_Percorso.push_back(j); //inserisco id dello spigolo
                 ProprietaLatiPercorso[j] = 1.0;
-                break; // trovato lo spigolo, esco dal ciclo interno
             }
         }
     } 
@@ -1345,18 +1348,17 @@ for (size_t i = 0; i < Pmesh.E; ++i) {
 
     Segmenti_Proprietà.push_back(ShortPathProperty);
 
-    utilities.ExportSegments("./Cell1Ds.inp",
+    utilities.ExportSegments("./Cell1Ds_ciao.inp",
 								  Pmesh.M0D,
 								  Pmesh.M1D_triangolini,
-                    {},
-                    Segmenti_Proprietà);
+                                  {},
+                                  Segmenti_Proprietà);
 
  return true;
 
 }
-
-
-
-
 }
+
+
+
 

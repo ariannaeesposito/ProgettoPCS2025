@@ -60,6 +60,9 @@
 		utilities.ExportSegments("./Cell1DsD.inp",
 								  Dmesh.M0D,
 								  Dmesh.M1D_triangolini);*/
+
+	CamminoMinimo(mesh);
+
 	return 0;
 
 	

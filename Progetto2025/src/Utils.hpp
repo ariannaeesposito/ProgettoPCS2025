@@ -26,7 +26,7 @@ namespace PolygonalLibrary
     bool stampa_geodetico(PolygonalMesh& Pmesh);
     bool Inizializzazione_punti_interni_classe2(PolygonalMesh& Pmesh);
     bool crea_triangolo(PolygonalMesh& Pmesh, const unsigned int& id_triangolo ,const unsigned int& id_pt_1, const unsigned int& id_pt_2, const unsigned int& id_pt_3, const unsigned int& id_sp_1, const unsigned int& id_sp_2, const unsigned int& id_sp_3);
-
+    bool CamminoMinimo(PolygonalMesh& Pmesh);
 
 
     // unsigned int accedimappa(TriangularMesh& mesh, PolygonalMesh& Pmesh, Vector3d<unsigned int> coord);

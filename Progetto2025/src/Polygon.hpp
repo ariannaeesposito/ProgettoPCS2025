@@ -21,7 +21,7 @@ namespace PolygonalLibrary{
         vector<unsigned int> Cell2DsId;
 
         unsigned int classe;
-        unsigned int d , q , p;
+        unsigned int d , q , p , id_vertice_iniziale , id_vertice_finale ;
         double lunghezza_lato_triangolino; // numero di spigoli
         // V, E, F :  n di vertici totali (con mesh), n spigoli totali (con mesh), n facce di tutti i triangoli (con mesh)
         unsigned int V, E, F, T;   
@@ -35,7 +35,7 @@ namespace PolygonalLibrary{
         map <unsigned int, list<unsigned int>> marker2D;
 
         MatrixXd M0D; // 3 * ID punti --> coordinate 
-        MatrixXi M1D; //spigoli poligono platonico
+        MatrixXi M1D; //spigoli poligono originale ( platonico )
         MatrixXi M1D_triangolini; // matrice spigoli triangolini 2*num_spigolini , per ogni j-esimo spigolino ho i due punti sulle righe 
         MatrixXi M_pt_spigoli; //matrice che conterrà l'ID del j-esimo punto ( anche generato dalla mesh ) sul i-esimo spigolo.  matrice id_spigolo*num_punti(sullo spigolo) 
         MatrixXi M1D_spigoli_intermedi; //matrice di dimensione (numero_spigoli × d) (d = NUMERO DI SEGMENTI su ogni lato)

@@ -1,67 +1,81 @@
 #include <iostream>
-	#include "Polygon.hpp"
-	#include "Utils.hpp"
-	#include "UCDUtilities.hpp"
+#include "Polygon.hpp"
+#include "Utils.hpp"
+#include "UCDUtilities.hpp"
 	
-	using namespace std;
-	using namespace Eigen;
-	using namespace PolygonalLibrary;
+using namespace std;
+using namespace Eigen;
+using namespace PolygonalLibrary;
 	
+	Gedim::UCDUtilities utilities;
+
 	int main(int argc ,char* argv[])
 	{
-		PolygonalMesh mesh;
+		PolygonalMesh mesh, platonico, Dmesh;
+		unsigned int classe;
+		string poligono_platonico;
 		
-		if(!input_solido_platonico(mesh, argc, argv))
-		{
-			cerr << "Error Input non imported successfully" << endl;
-			return 1;
-		}
-		else
-		{
+		if(input_solido_platonico(platonico, mesh, argc, argv, poligono_platonico, classe))
 			cout << "Input imported successfully" << endl;
-		}
-
-		if(!ImportMesh(mesh))
-		{
-			cerr << "Error File not found" << endl;
+		else{
+			cout << "Error in input" << endl;
 			return 1;
 		}
-		else
-		{
+		if(ImportMesh(platonico, poligono_platonico))
 			cout << "File imported successfully" << endl;
-		}
-
-		Inizializzazione_vertici(mesh);
-
-		if (mesh.classe == 1){
-			Inizializzazione_punti_interni(mesh);
+		
+		if(Inizializzazione_vertici(mesh, classe, platonico))
+			cout << "Vertices initialized successfully" << endl;
+	
+		if (classe == 1){
+			if (Triangolazione_1_classe(mesh, platonico))
+				cout << "Triangulation of class 1 completed successfully" << endl;
 		}
 		else{
-			Inizializzazione_punti_interni_classe2(mesh);
+			if (Triangolazione_2_classe(mesh, platonico))
+				cout << "Triangulation of class 2 completed successfully" << endl;			
 		}
 
-		// Proiezione_sfera(mesh);
-		//stampa_geodetico(mesh);
-		
-		Gedim::UCDUtilities utilities;
-		utilities.ExportPoints("./Cell0Ds.inp",
+	// 	//stampa su paraview Solido triangolato
+
+		utilities.ExportPoints("./Triangolazione0Ds.inp",
 								mesh.M0D);
-		utilities.ExportSegments("./Cell1Ds.inp",
+		utilities.ExportSegments("./Triangolazione1Ds.inp",
 								  mesh.M0D,
-								  mesh.M1D_triangolini);
+								  mesh.M1D);
+						
+		//stampa su paraview Solido proiettato sulla sfera
 
-	
-		/*PolygonalMesh Dmesh;
+		Proiezione_sfera(mesh);
+
+		utilities.ExportPoints("./ProiezioneSfera0Ds.inp",
+								mesh.M0D);
+		utilities.ExportSegments("./ProiezioneSfera1Ds.inp",
+			  					mesh.M0D,
+			  					mesh.M1D);
+		
+
+	if ( argc == 7 ){
+									CamminoMinimo(mesh);
+
+								}								
+		//stampa su paraview duale		
+
 		Duale(mesh, Dmesh);
-		Proiezione_sfera(Dmesh);
 
-		utilities.ExportPoints("./Cell0DsD.inp",
+		utilities.ExportPoints("./Duale0Ds.inp",
 								Dmesh.M0D);
-		utilities.ExportSegments("./Cell1DsD.inp",
-								  Dmesh.M0D,
-								  Dmesh.M1D_triangolini);*/
-	return 0;
+		utilities.ExportSegments("./Duale1Ds.inp",
+			  					Dmesh.M0D,
+			  					Dmesh.M1D);
 
-	
-	
+		//stampa_solido(mesh, poligono_platonico);
+		stampa_solido(platonico, poligono_platonico);	
+		//stampa_solido(Dmesh, poligono_platonico);
+
+
+		if ( argc == 7 ){
+			CamminoMinimo(Dmesh);
+		}
+	return 0;
 	}

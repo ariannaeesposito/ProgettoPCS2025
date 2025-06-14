@@ -17,6 +17,7 @@ namespace PolygonalLibrary{
         unsigned int V, E, F;   
         
         unsigned int nodo_i, nodo_f; // vertici iniziale e finale per il percorso geodetico
+		vector<unsigned int> percorso; // vector con gli id del percorso
 
         MatrixXd M0D; // 3 * ID punti --> coordinate 
         MatrixXi M1D; //spigoli poligono platonico

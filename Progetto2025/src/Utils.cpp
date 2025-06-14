@@ -756,7 +756,7 @@ bool Triangolazione_2_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){
                 Pmesh.M1D.col(id_attuale_spigolo) = Vector2i(base[2*k+2], tetto[2*k+1]);
                 //unsigned int sette = id_attuale_spigolo;
                 id_attuale_spigolo++;       
-                crea_triangolo(Pmesh, base[2*k], base[2*k+1], id_pt_attuale-2, id_attuale_spigolo-7, base_spigoli[2*k], id_attuale_spigolo-6); 
+                crea_triangolo(Pmesh, base[2*k], base[2*k+1], id_pt_attuale-2,base_spigoli[2*k], id_attuale_spigolo-6, id_attuale_spigolo-7); 
                 //crea_triangolo(Pmesh, id_attuale_triangoli, base[2*k], base[2*k+1], baricentro1, uno, base_spigoli[2*k], due); 
                 //id_attuale_triangoli++;              
                 crea_triangolo(Pmesh, base[2*k+1], base[2*k+2], id_pt_attuale-2, base_spigoli[2*k+1], id_attuale_spigolo-5, id_attuale_spigolo-6);
@@ -813,7 +813,7 @@ bool Triangolazione_2_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){
             crea_triangolo(Pmesh, obliquo, id_pt_attuale, tetto[tetto.size()-1], id_attuale_spigolo-6, id_attuale_spigolo-5 , obliquo_spigolo2);
             //crea_triangolo(Pmesh, id_attuale_triangoli, obliquo, ultimo_baricentro, tetto[tetto.size()-1], alfa, beta, obliquo_spigolo2);
             //id_attuale_triangoli++;
-            crea_triangolo(Pmesh, id_pt_attuale, tetto[tetto.size()-1], BC[2*i+1], id_attuale_spigolo-5 , id_attuale_spigolo-1, BC_spigoli[i*2+1]);
+            crea_triangolo(Pmesh, id_pt_attuale, tetto[tetto.size()-1], BC[2*i+1], id_attuale_spigolo-5 ,BC_spigoli[i*2+1], id_attuale_spigolo-1);
             //crea_triangolo(Pmesh, id_attuale_triangoli, ultimo_baricentro, tetto[tetto.size()-1], BC[2*i+1], beta, eta, BC_spigoli[i*2+1]);
             //id_attuale_triangoli++;
             crea_triangolo(Pmesh, id_pt_attuale, BC[2*i+1], base[base.size()-1], id_attuale_spigolo-1 , BC_spigoli[2*i], id_attuale_spigolo-2);
@@ -906,7 +906,8 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
     // path contiene id dei vertici del cammino minimo 
     vector<unsigned int> percorso;
     percorso.reserve(contatore);
-
+	Pmesh.percorso.reserve(contatore);
+	
     unsigned int nodo_ritroso = Pmesh.nodo_f;
     // riempe al contrario il percodo
     while(nodo_ritroso != Pmesh.nodo_i){
@@ -914,6 +915,7 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
         nodo_ritroso = pred[nodo_ritroso];
     } 
     percorso.push_back(Pmesh.nodo_i);
+	Pmesh.percorso = percorso;
 
     cout << "la lunghezza del porcorso minimo è di: " << dist[Pmesh.nodo_f] << endl << "Il numero di nodi da percorrere è: " << percorso.size() << endl << "Il percorso minimo è dato da: " << endl;
 

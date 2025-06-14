@@ -53,13 +53,11 @@ using namespace PolygonalLibrary;
 		utilities.ExportSegments("./ProiezioneSfera1Ds.inp",
 			  					mesh.M0D,
 			  					mesh.M1D);
-		
 
 	if ( argc == 7 ){
-									CamminoMinimo(mesh);
-
-								}								
-		//stampa su paraview duale		
+		CamminoMinimo(mesh);
+		}
+		//stampa su paraview duale
 
 		Duale(mesh, Dmesh);
 

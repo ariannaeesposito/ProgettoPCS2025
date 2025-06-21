@@ -131,13 +131,13 @@ mesh.M3D={mesh.V, mesh.E, mesh.F}; // inizializzo M3D con il numero di vertici, 
 return true;
 }
 
-bool ImportMesh(PolygonalMesh& platonico, const string& poligono_platonico)
+bool ImportMesh(PolygonalMesh& poligono, const string& poligono_platonico)
     {
-    if(!ImportCell0Ds(platonico, poligono_platonico))
+    if(!ImportCell0Ds(poligono, poligono_platonico))
         return false;
-    if(!ImportCell1Ds(platonico, poligono_platonico))
+    if(!ImportCell1Ds(poligono, poligono_platonico))
         return false;   
-    if(!ImportCell2Ds(platonico, poligono_platonico))
+    if(!ImportCell2Ds(poligono, poligono_platonico))
         return false;
     return true;     
     }
@@ -262,14 +262,13 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , const unsigned int& classe
         //Creiamo i punti intermedi lungo lo spigolo
         for (unsigned int j = 1; j < b; j++) // ci muoviamo lungo interno saltando il primo e lultimo 
         {               
-            unsigned int id = poligono.V +i*(b-1)+j-1; //id punti intermedi  :n è l'offset per partire dopo i vertici iniziali, i * (e - 2) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
+            unsigned int id = poligono.V +i*(b-1)+j-1; //id punti intermedi  :poligono.V è l'offset per partire dopo i vertici iniziali, i * (b-1) tiene conto dei punti dei precedenti spigoli, j è il punto specifico su questo spigolo
             Pmesh.M_pt_spigoli(i,j) = id; //inserisce id punti intermedi nella matrice degli spigoli TOTALI
             Vector3d coord = Acoord + s(j)* (Bcoord-Acoord); //coordinate punti intermedi
             Pmesh.M0D.col(id) = coord; //inserisce coordinate punti intermedi nella matrice globale
         }
 
     }	
- // stampa la matrice M_pt_spigoli
 
     unsigned int id_spigoli= 0;
 	Pmesh.M1D = MatrixXi::Zero(2,Pmesh.E);
@@ -279,7 +278,7 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , const unsigned int& classe
     {
         for (unsigned int h=0; h < b; h++)
         {
-            //inizialmente riempiamo M1D_triangolini inserendo per ogni id_spigoli gli id dei suoi vertici
+            //inizialmente riempiamo M1D inserendo per ogni id_spigoli gli id dei suoi vertici
             Pmesh.M1D(0,id_spigoli) = Pmesh.M_pt_spigoli(k,h);
             Pmesh.M1D(1,id_spigoli) = Pmesh.M_pt_spigoli(k,h+1);
 
@@ -291,7 +290,6 @@ bool Inizializzazione_vertici( PolygonalMesh& Pmesh , const unsigned int& classe
         }	 
 
     }	
-cout << "4: " << endl;
     //Dopo aver eseguito tutta la funzione:
     //M0D conterrà i vertici originali + tutti i punti interpolati sugli spigoli
     //M_pt_spigoli ti dirà quali punti sono su ciascuno spigolo (per triangolare le facce)
@@ -308,7 +306,7 @@ bool Triangolazione_1_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){ //I
     unsigned int num_facce = poligono.F; // numero di facce
     unsigned int n_nuovi_punti = num_facce * (d - 2) * (d - 1) / 2;
     unsigned int id_pt_attuale = Pmesh.V - n_nuovi_punti; 
-    unsigned int id_attuale_spigoli = poligono.E*d; // numero di spigoli già creati (dalla triangolazione geodetica) + quelli che creeremo ora
+    unsigned int id_attuale_spigoli = poligono.E*d; // numero di spigoli già creati (dalla triangolazione geodetica)
     Pmesh.M2D_spigoli.reserve(Pmesh.F); 
     Pmesh.M2D_vertici.reserve(Pmesh.F);
 
@@ -319,7 +317,7 @@ bool Triangolazione_1_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){ //I
         int A_id = poligono.M2D_vertici[faccia_id][0];
         int B_id = poligono.M2D_vertici[faccia_id][1];
         int C_id = poligono.M2D_vertici[faccia_id][2];
-       // //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli. in questo modo trovo l'ID di ogni spigolo per faccia
+       // M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli. in questo modo trovo l'ID di ogni spigolo per faccia
         int AB_id = poligono.M2D_spigoli[faccia_id][0];
         int BC_id = poligono.M2D_spigoli[faccia_id][1];
         int CA_id = poligono.M2D_spigoli[faccia_id][2];
@@ -646,7 +644,7 @@ bool Triangolazione_2_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){
         int B_id = poligono.M2D_vertici[faccia_id][1];
         int C_id = poligono.M2D_vertici[faccia_id][2];
 
-       // //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli. in questo modo trovo l'ID di ogni spigolo per faccia
+       //M2D_spigoli[faccia_id] è un vettore di 3 interi: gli ID degli spigoli. in questo modo trovo l'ID di ogni spigolo per faccia
         int AB_id = poligono.M2D_spigoli[faccia_id][0];
         int BC_id = poligono.M2D_spigoli[faccia_id][1];
         int CA_id = poligono.M2D_spigoli[faccia_id][2];

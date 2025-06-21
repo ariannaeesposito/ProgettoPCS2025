@@ -357,7 +357,7 @@ bool Triangolazione_1_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){ //I
 			VectorXi CA_spigoli_reversed = CA_spigoli.reverse().eval();
             CA_spigoli= CA_spigoli_reversed;
         }
-        //Controlla che Pmesh.M2D_spigoli[faccia_id] abbia ID coerenti per ogni faccia        
+              
         VectorXi base = AB; // vettore di tutti i punti tra A e B
 		VectorXi base_spigoli = AB_spigoli; // vettore di id di spigolini tra A e B
         VectorXi tetto;

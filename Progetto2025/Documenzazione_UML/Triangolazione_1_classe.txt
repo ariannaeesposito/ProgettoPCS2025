@@ -1,0 +1,84 @@
+@startuml
+title Triangolazione_1_classe
+
+start
+
+:Riservo le M2D di spigoli e di vertici (Solido_Platonico.F);
+
+note right
+Vector di Vector
+del poligono Triangolato
+contenente info dei triangolini
+end note 
+
+repeat
+
+note right
+Itero sulle facce del poligono Platonico
+end note 
+
+:Memorizzo id spigoli e id punti in vettori di supporto;
+
+:Verifico che i 3 vettori di punti siano orientati correttamente;
+note right 
+         C 
+         ^
+          |
+A  --> B
+end note 
+note left
+$ = O (b)
+Costo del reverse
+end note 
+
+:Inizializzo i vettori dei punti e degli spigoli della base;
+:Dichiaro i vettori dei punti e degli spigoli del tetto;
+  repeat
+
+  note right
+  Itero saltando l ultimo livello 
+  end note
+
+  :Creo il primo triangolo del piano;
+  :Resize dei vettori dei punti e degli spigoli del tetto;
+  note right
+  $ = O (b) 
+  Costo del resize
+  end note
+  
+  :Inizializzo vettore linspace dei punti del tetto;
+  
+    repeat
+    note right
+    Itero sui parallelogrammi
+    (2 triangoli consecutivi)
+    end note
+    note left
+    $ = O (b) 
+    end note 
+    
+    :Creo lo spigolo sinistro obliqo del triangolo di sinistra;
+    :Creo il triangolo di sinistra del parallelogramma;
+    :Inserisco in tetto_spigoli il lato superiore del triangolo;
+    
+    
+    if (Siamo sull ultimo parallelogramma?) then (si)
+        :Crea ultimo triangolo del livello;
+    else (no)
+    :creo con linspace un punto che inserisco nel tetto dei punti;
+    :creo lo spigolo obliqo destro del triangolo di destra;
+    :creo il triangolo di destra del parallelogramma;
+    
+    end if
+    
+    repeat while (Ci sono altri parallelogrammi?)is (    si)
+    
+    :Riinizializzo la base assegnandoli il  tetto;
+    
+  repeat while (Ci sono altri livelli?) is (    si)
+  :creo il triangolo superiore della faccia;
+repeat while (Ci sono altre facce da triangolare?) is (    si)
+
+
+stop
+@enduml

@@ -1,0 +1,42 @@
+@startuml
+title input_solido_platonico
+
+start
+:Legge input {p,q,b,c} o {p,q,b,c,nodo_i,nodo_f} passati dal main;
+:controllo che len(input) = 5 o len(input) = 7;
+if (p==3)
+switch(q)
+      case (3 o 4 o 5) 
+          :Assegna V E F al solido Platonico;
+          :Crea M3D del solido Platonico;
+      case (defoult) 
+          :Return false;
+      endswitch
+endif
+if (q==3 && p!=3)
+switch(p)
+  case(4 o 5)
+          :Assegna V E F al solido Platonico;
+          :Crea M3D del solido Platonico;
+      case (defoult) 
+          :Return false;
+      endswitch
+endif
+if (classe=1)
+note right 
+b==0 && c>=1 || c==0 && b>=1
+end note
+:Assegna V E F al solido Triangolato di 1^specie;
+:Crea M3D del solido Triangolato;
+endif
+if (classe=2)
+note right 
+b==c && b>=1
+end note
+:Assegna V E F al solido Triangolato di 2^specie;
+:Crea M3D del solido Triangolato;
+endif
+:Con una Flag si verifica che i valori in input siano stati assegnati correttamente.;
+
+stop
+@enduml

@@ -73,7 +73,7 @@ if (mesh.q==3 && mesh.p!=3){ //duale di un solido a facce triangolari
 
     switch (mesh.p)
     {
-    case 4: //ottaedro -> tetraedro duale
+    case 4: //cubo -> tetraedro duale
         poligono_platonico = "tetraedro";
         poligono.V = 4;
         poligono.E = 6;

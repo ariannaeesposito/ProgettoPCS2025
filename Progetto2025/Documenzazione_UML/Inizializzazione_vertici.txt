@@ -1,0 +1,43 @@
+@startuml
+title Inizializzazione_vertici
+
+start
+:Inizializzo M0D (3 X Solido_Platonico.V);
+note right
+Matrice
+delle coordinate
+del solido Triangolato
+end note 
+:Vi inserisco la M0D del solido Platonico;
+
+
+:Inizializzo M_pt_spigoli (Solido_Platonico.E X b+1);
+note right
+Matrice 
+dei punti intermedi 
+tra i vertici 
+end note
+note left 
+$ = O (b)
+end note
+:Si riempie con linspace;
+
+
+:Inizializzo M1D (2 X Solido_Platonico.E);
+note right
+Matrice
+degli spigoli
+del solido Triangolato
+end note 
+
+
+:Inizializzo M1D_spigoli_intermedi(Solido_Platonico.E X b);
+note right
+Matrice 
+degli spigoli intermedi 
+tra i punti intermedi 
+end note
+:Si riempie con 2 cicli for annidati;
+
+stop
+@enduml

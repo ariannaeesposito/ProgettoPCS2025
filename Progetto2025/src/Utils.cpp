@@ -380,7 +380,7 @@ bool Triangolazione_1_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){ //I
 			const auto s = VectorXd::LinSpaced(d-i,0.0,1.0);// linspaced da 0 a 1 con d-i punti
 
             // itero sui parallelogrammi dopo aver creato il primo triangolo 
-            for (unsigned int j = 1; j < d - i; j ++) // con i + j == d , avremmo k=0 : Il punto cade su un lato (perché è una combinazione convessa di soli due vertici)
+            for (unsigned int j = 1; j < d - i; j ++) 
             {   
 				
                 if (j == d-i-1){ // ultimo parallelogramma 

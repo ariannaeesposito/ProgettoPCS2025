@@ -1,0 +1,71 @@
+@startuml
+title Triangolazione_2_classe
+
+start
+repeat
+
+:Itero sulle facce del poligono Platonico;
+
+note right
+Si ripetono i passaggi preliminari della traingolazione 1
+end note 
+  :Inizializzo i vettori dei punti e degli spigoli della base;
+  note right
+  Iterando sui livelli la dim diminuisce di 2
+  end note
+
+    repeat
+      :Itero sui livelli;
+      note left
+      $ = O (b) 
+      end note
+
+  :Inizializzo a 0 vettori dei punti e degli spigoli del tetto;
+  note left
+  $ = O (b) 
+  Costo del resize
+  end note
+  
+    :Iterando sulla lunghezza del
+    "tetto" genero i punti pari; 
+    note right
+    Con "tetto" si intende
+    il tetto privato dei baricentri
+    end note
+
+    :Inizializzo i 2 spigoli obliqui
+    e il punto obliquo;
+
+      repeat
+      :Itero sui parallelogrammi;
+      note left
+      $ = O (b) 
+      end note
+      note right
+          ____
+        /  \   /  
+       /__ \/
+       
+      end note
+      :creo 2 baricentri, il 2^ va inserito nel tetto;
+      note right
+      Sono i punti dispari
+      end note
+      :creo 6 triangolini(dopo aver ricavato i punti e gli spigoli);
+      :sovrascrivo il punto obliquo con il 2^baricentro
+      sovrascrivo gli spigoli obliqui;
+      repeat while (Ci sono altri parallelogrammi?) is (    si)
+    :creo gli ultimi 6 triangolini del livello;
+    note right
+    crea anche quelli in cima della faccia
+    end note
+    :Riinizializzo la base assegnandoli il tetto;
+  repeat while (Ci sono altri livelli?) is (    si)
+repeat while (Ci sono altre facce da triangolare?) is (    si)
+
+
+stop
+note left
+$TOT=F*(b+b)*b=O(b^2)
+end note
+@enduml

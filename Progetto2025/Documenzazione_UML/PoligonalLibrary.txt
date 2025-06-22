@@ -1,0 +1,70 @@
+@startuml
+
+@startuml
+set separator :: 
+
+package PolygonalLibrary {
+
+  struct PolygonalMesh {
+    .. Coordinate ..
+    + MatrixXd M0D
+    .. Spigoli    ..
+    + MatrixXi M1D
+    .. Facce      ..
+    + vector<vector<int>> M2D_vertici
+    + vector<vector<int>> M2D_spigoli
+    .. Poligono   ..
+    + vector<unsigned int> M3D
+
+  }
+
+
+
+  Azionisulpoliedro --> PolygonalMesh
+  PolygonalMesh --> Azionisulpoliedro
+  PolygonalMesh --> GestioneDati
+  GestioneDati --> PolygonalMesh
+  Azionisulpoliedro --> FunzioniAusiliarie
+
+}
+
+
+package PolygonalLibrary::Azionisulpoliedro{
+  abstract Azionisulpoliedro <<namespace>>  {
+    .. Triangolazioni ..
+    # bool Triangolazione_1_classe()
+    # bool Triangolazione_1_classe()
+    .. Altro ..
+    # bool CamminoMinimo()
+    # bool Proiezione_sfera()
+    # bool Duale()
+
+  }
+}
+
+package PolygonalLibrary::GestioneDati {
+  abstract GestioneDati <<namespace>> {
+    .. Check data ..
+    # bool input_solido_platonico
+    .. Import data ..
+    # bool Importmesh()
+    # bool ImportCell0Ds()
+    # bool ImportCell1Ds()
+    # bool ImportCell2Ds()
+    .. Export data ..
+    # bool stampa_solido()
+  }
+}
+
+package PolygonalLibrary::FunzioniAusiliarie {
+  abstract FunzioniAusiliarie <<namespace>> {
+  # bool Inizializzazione_vertici()
+  # vector3D baricentro()
+  # bool crea_triangolo()
+  }
+}
+
+
+
+
+@enduml

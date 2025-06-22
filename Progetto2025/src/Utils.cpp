@@ -778,7 +778,7 @@ bool Triangolazione_2_classe(PolygonalMesh& Pmesh, PolygonalMesh& poligono){
                 // obliquo_spigolo1 = sette;
                 obliquo_spigolo2 = tetto_spigoli[2*k+1]; // id del secondo spigolo del parallelogramma
             }                    
-            // creo il triangolo finale della faccia
+            // creo il triangolo finale del livello
             Pmesh.M0D.col(id_pt_attuale)=baricentro(Pmesh.M0D.col(tetto[tetto.size()-1]), Pmesh.M0D.col(base[base.size()-1]), Pmesh.M0D.col(base[base.size()-3]));
             //unsigned int ultimo_baricentro = id_pt_attuale;      
             Pmesh.M1D.col(id_attuale_spigolo) = Vector2i(obliquo, id_pt_attuale); 

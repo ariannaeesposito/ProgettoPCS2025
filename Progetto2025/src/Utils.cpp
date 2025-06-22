@@ -863,12 +863,13 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
     unsigned int u = Pmesh.nodo_i; // inizializzo u a un valore che sicuro non potrà assumere il nodo finale(impostato all'inizio del programma)
     unsigned int contatore = 0;
     // Se u diventa nodo_f significa che è stato prelevato da PQ, di conseguenza è la piu piccola distanza in PQ, quindi d[u] sarà proprio uguale alla distanza minima. 
-    while(u != Pmesh.nodo_f){ 
+    while(!PQ.empty()){ 
         // contatore per calcolare il reserve sul vettore percorso creato in seguito
         contatore += 1;
         // double p = PQ.top().first; Distanza minimima di u. Serviva per   // if ( p > dist[u] ) continue; si è optato per una versione più ottimale per grafi con moltinodi 
         u = PQ.top().second; // punto
-        PQ.pop(); //rimuove ( non restituisce nulla ) l’elemento con priorità più alta 
+        if ( u == Pmesh.nodo_f ) break; // se u è il nodo finale allora si interrompe il ciclo, perchè non ha senso continuare a cercare altri nodi
+	PQ.pop(); //rimuove ( non restituisce nulla ) l’elemento con priorità più alta 
         // scarta entry obsolete: se esiste già una distanza minore trovata per u, ignoro questa versione ( problema generato dal push in PQ)
         if ( visitato[u] ) continue;        // if ( p > dist[u] ) continue;
         visitato[u] = true;

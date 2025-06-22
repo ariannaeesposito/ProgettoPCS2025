@@ -1,0 +1,111 @@
+@startuml
+title CamminoMinimio
+
+start
+
+if (I nodi iniziali e finali hanno valori accettabili?) then (no)
+:return false;
+stop
+end if
+
+
+:inizializzo vettori: Precedente P, Visitato V e Distanze D,
+e la Priority Queue PQ;
+
+note right
+Algoritmo Dijkstra;
+end note
+
+:Inizializzo "lista di adiacenza";
+
+note right 
+Matriche che Associa ad ogni nodo tutti gli spigoli collegati ad esso
+end note 
+
+note left 
+$ = O (b)
+end note 
+
+
+
+  repeat 
+  note right
+  $ = O (b) Itero fino a quando PQ è vuota
+  end note
+  :Leggo da PQ il nodo u e
+  rimuovo la coppia distanza,nodo da PQ;
+  if (è stato rimosso il nodo finale da PQ?) then (si)
+  :Ho ricavato il percorso minimo per arrivare al nodo finale;
+  stop
+  else (no)
+  end if 
+  if (Il percorso fino a u è gia stato minimizzato?) then (si)
+  :Salta questo elemento;
+  stop
+  note left 
+  vado al prossimo
+  elemento di PQ
+  end note 
+  
+  
+  else (no)
+  :Aggiorno Visitato a vero;
+
+  end if
+  
+   repeat
+   
+   note right
+   $ = 10 (valenza massima)
+   Itero sugli spigoli collegati a u,
+   ricavati dalla "lista di adiacenza"
+   end note
+   
+   :inizializzo v come l altro nodo dello spigolo;
+   
+   
+  if (Il percorso fino a v è gia stato minimizzato?) then (si)
+  :Salta questo elemento;
+  stop
+  note left 
+  vado al prossimo
+  nodo adiacente di u 
+  end note
+    
+  else (no)
+  
+  end if
+   
+  :calcolo la distanza tra u e v;
+  note right
+  w
+  end note
+  :calcolo la distanza tra il nodo iniziale e v, passando per u; 
+  note right
+  newD(v) := w + D[u]
+  end note
+
+  if( newDv < distanza tra nodo iniziale e v := D[v])
+    :aggiorno D[v] a newDv ;
+    :il nodo precedente per giungere a v sarà u ;
+    :inserisco in PQ la coppia (newDv , v);
+  end if 
+   
+  repeat while (Ci sono altri spigoli collegati a u ?) is (si)
+
+  repeat while (Ci sono altri percorsi da considerare?) is (si)
+  
+  :creo un vettore contenente il percorso minimo risalendo a ritroso da P;
+  note right
+  percorso
+  end note
+  :stampo D[Nodo finale] e percorso;
+  
+  :stampo percoso minimo su Paraview;
+  
+
+  stop
+  note
+  :$ TOT = O(b^2);
+  end note
+@enduml

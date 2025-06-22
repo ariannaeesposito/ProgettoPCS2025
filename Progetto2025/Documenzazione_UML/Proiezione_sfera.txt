@@ -1,0 +1,11 @@
+@startuml
+title Proiezione_Sfera
+start
+note 
+Itero sui punti del poligono 
+end note
+repeat
+:Normalizzo il punto;
+repeat while (Ci sono altri punti da normalizzare?) is (si)
+stop
+@enduml

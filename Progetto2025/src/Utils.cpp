@@ -852,7 +852,7 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
 
     vector<unsigned int> pred(Pmesh.V,-1); //inizilizzo il vettore predecessore a -1
     vector<double> dist(Pmesh.V, numeric_limits<double>::infinity()); //inizilizzo il vettore delle distanze a un numero molto grande
-    vector<bool> visitato(Pmesh.V,false);
+    //vector<bool> visitato(Pmesh.V,false);
     using ND = pair<double, int>; //Ogni elemento della coda è una coppia formata da: int (ID di un nodo) e double (distanza)
     priority_queue < ND, vector<ND>, greater<ND>> PQ; // priority_queue<  Tipo,   Contenitore,     Criterio >: classe STL per le code con priorità (distanza)
     // greater(criterio) per avere che il minimo sia estratto per primo ( sia messo in cima ed estratto con top )
@@ -862,20 +862,21 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
     dist[Pmesh.nodo_i] = 0.0;
     PQ.push({0.0, Pmesh.nodo_i});    // for(unsigned int i = 0; i < LA.size(); i++){    //     PQ.push({dist[i], i}); Non è necessario
     
-    unsigned int u = Pmesh.nodo_i; // inizializzo u a un valore che sicuro non potrà assumere il nodo finale(impostato all'inizio del programma)
+    unsigned int u ;
+	double p ;
     unsigned int contatore = 0;
     // Se u diventa nodo_f significa che è stato prelevato da PQ, di conseguenza è la piu piccola distanza in PQ, quindi d[u] sarà proprio uguale alla distanza minima. 
     while(!PQ.empty()){ 
         // contatore per calcolare il reserve sul vettore percorso creato in seguito
         contatore += 1;
-        // double p = PQ.top().first; Distanza minimima di u. Serviva per   // if ( p > dist[u] ) continue; si è optato per una versione più ottimale per grafi con moltinodi 
+        p = PQ.top().first; //Distanza minimima di u. Serve per  if ( p > dist[u] ) continue; si è optato per una versione più ottimale per grafi con moltinodi 
         u = PQ.top().second; // punto
-        if ( u == Pmesh.nodo_f ) break; // se u è il nodo finale allora si interrompe il ciclo, perchè non ha senso continuare a cercare altri nodi
+        //if ( u == Pmesh.nodo_f ) break; // se u è il nodo finale allora si interrompe il ciclo, perchè non ha senso continuare a cercare altri nodi
 	PQ.pop(); //rimuove ( non restituisce nulla ) l’elemento con priorità più alta 
         // scarta entry obsolete: se esiste già una distanza minore trovata per u, ignoro questa versione ( problema generato dal push in PQ)
-        if ( visitato[u] ) continue;        // if ( p > dist[u] ) continue;
-        visitato[u] = true;
-
+        //if ( visitato[u] ) continue;        // 
+        //visitato[u] = true;
+	if ( p > dist[u] ) continue;
         // ottimizzazione: se dist[u] è già uguale a dist[nodo_f], allora nodo_f è già stato raggiunto al minimo. Quindi si interrompe il ciclo
         //if ( u != Pmesh.nodo_f && dist[u] == dist[Pmesh.nodo_f] && dist[Pmesh.nodo_f]!= numeric_limits<double>::infinity()) break; // se la distanza associata al nodo u è uguale alla distanza del nodo finale nella lista delle distanze allora per forza è gia la distanza minima per arrivare al nodo finale
         
@@ -886,7 +887,9 @@ bool CamminoMinimo(PolygonalMesh& Pmesh){
             //Iterando sugli spigoli costruiti con u, quindi uno dei due nodi che lo crea è proprio u. Inizializzo quindi v come l'altro nodo
             unsigned int v = (u == id_nodoA ? id_nodoB : id_nodoA); 
             //visitato[v]=True se v è stata prelevata da PQ, dunque si conosce d[v](distanza min tra v e nodo_i). Non ha senso quindi confrontarla rispetto a u.
-            if ( visitato[v] ) continue;
+            //if ( visitato[v] ) continue;
+		if ( dist[v] < dist[u] ) continue;//evito di visitare nodi già visitati, che hanno una distanza minima già calcolata.
+
             //distanza tra Nodo u e nodo v. La norma è O(1), ma sqrt diventa costosa se ripetuta più volte. Per evitare che venga calcolata in casi superflui si fa il controllo precedente. 
             double w = (Pmesh.M0D.col(u) - Pmesh.M0D.col(v)).norm();
             //dist[u] è la distanza più piccola che per ora l'algoritmo è riuscita a calcolare tra il nodo_i e u. 

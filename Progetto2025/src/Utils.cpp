@@ -532,7 +532,7 @@ bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh)
 		}
 	}
 	
-    MatrixXi id_spigoli = -1*MatrixXi::Ones(10,Pmesh.F);
+    MatrixXi id_spigoli = -1*MatrixXi::Ones(10,Pmesh.V);
 	
 	unsigned int id_vertice;
 	unsigned int id_spigolo_precedente;
@@ -555,8 +555,10 @@ bool Duale(PolygonalMesh& Pmesh, PolygonalMesh& Dmesh)
 				id_spigoli(j,B_id) = k;
 				break;
 			}
+			
 		}
 	}
+
 
 	for (unsigned int h = 0; h < Pmesh.V; h++){
         

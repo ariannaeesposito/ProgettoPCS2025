@@ -301,11 +301,23 @@ TEST(PolygonalTest, TestCamminoMinimo){
 	char valenza = '3';
 	char d = '2';
 
-	cout << "prova"<< endl;
+	//cout << "prova"<< endl;
 	vector<unsigned int> percorso1={7,4,6};
 	vector<unsigned int> percorso2={7,5,6};
 	
 	PolygonalMesh mesh = crea_mesh(valenza, d, 1, "");
 	CamminoMinimo(mesh);
 	EXPECT_TRUE(mesh.percorso == percorso1 || mesh.percorso == percorso2);
+}
+
+TEST(PolygonalTest, TestCamminoMinimoLunghezza){
+	char valenza = '3';
+	char d = '9';
+	unsigned int d_num = 9;
+	
+	PolygonalMesh mesh = crea_mesh(valenza, d, 1, "");
+	mesh.nodo_i = 2;
+	mesh.nodo_f = 1;
+	CamminoMinimo(mesh);
+	EXPECT_EQ(mesh.percorso.size(), d_num+1);
 }
